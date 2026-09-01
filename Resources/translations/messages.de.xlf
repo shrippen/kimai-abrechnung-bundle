@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundle">
+    <body>
+      <trans-unit id="a000" resname="menu.abrechnung">
+        <source>menu.abrechnung</source>
+        <target>Abrechnung</target>
+      </trans-unit>
+      <trans-unit id="a001" resname="abrechnung.title">
+        <source>abrechnung.title</source>
+        <target>Abrechnungsübersicht</target>
+      </trans-unit>
+      <trans-unit id="a002" resname="abrechnung.month">
+        <source>abrechnung.month</source>
+        <target>Monat</target>
+      </trans-unit>
+      <trans-unit id="a003" resname="abrechnung.year">
+        <source>abrechnung.year</source>
+        <target>Jahr</target>
+      </trans-unit>
+      <trans-unit id="a004" resname="abrechnung.customer">
+        <source>abrechnung.customer</source>
+        <target>Kunde</target>
+      </trans-unit>
+      <trans-unit id="a005" resname="abrechnung.user">
+        <source>abrechnung.user</source>
+        <target>Mitarbeiter</target>
+      </trans-unit>
+      <trans-unit id="a006" resname="abrechnung.all">
+        <source>abrechnung.all</source>
+        <target>Alle</target>
+      </trans-unit>
+      <trans-unit id="a007" resname="abrechnung.date">
+        <source>abrechnung.date</source>
+        <target>Datum</target>
+      </trans-unit>
+      <trans-unit id="a008" resname="abrechnung.project">
+        <source>abrechnung.project</source>
+        <target>Projekt</target>
+      </trans-unit>
+      <trans-unit id="a009" resname="abrechnung.description">
+        <source>abrechnung.description</source>
+        <target>Beschreibung</target>
+      </trans-unit>
+      <trans-unit id="a010" resname="abrechnung.duration">
+        <source>abrechnung.duration</source>
+        <target>Dauer</target>
+      </trans-unit>
+      <trans-unit id="a011" resname="abrechnung.amount">
+        <source>abrechnung.amount</source>
+        <target>Betrag</target>
+      </trans-unit>
+      <trans-unit id="a012" resname="abrechnung.empty">
+        <source>abrechnung.empty</source>
+        <target>Keine offenen Positionen – alles abgerechnet! 🎉</target>
+      </trans-unit>
+      <trans-unit id="a013" resname="abrechnung.mark_all_visible">
+        <source>abrechnung.mark_all_visible</source>
+        <target>Alle sichtbaren abrechnen</target>
+      </trans-unit>
+      <trans-unit id="a014" resname="abrechnung.mark_customer">
+        <source>abrechnung.mark_customer</source>
+        <target>Kunde abrechnen</target>
+      </trans-unit>
+      <trans-unit id="a015" resname="abrechnung.unmark_selected">
+        <source>abrechnung.unmark_selected</source>
+        <target>Auswahl abwählen</target>
+      </trans-unit>
+      <trans-unit id="a016" resname="abrechnung.mark_project">
+        <source>abrechnung.mark_project</source>
+        <target>Projekt abrechnen</target>
+      </trans-unit>
+      <trans-unit id="a017" resname="abrechnung.mark_entry">
+        <source>abrechnung.mark_entry</source>
+        <target>Eintrag abrechnen</target>
+      </trans-unit>
+      <trans-unit id="a018" resname="abrechnung.undo">
+        <source>abrechnung.undo</source>
+        <target>Rückgängig</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

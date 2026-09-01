@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundleFlash">
+    <body>
+      <trans-unit id="a000" resname="abrechnung.marked_success">
+        <source>abrechnung.marked_success</source>
+        <target>Einträge erfolgreich als abgerechnet markiert.</target>
+      </trans-unit>
+      <trans-unit id="a001" resname="abrechnung.unmarked_success">
+        <source>abrechnung.unmarked_success</source>
+        <target>Auswahl erfolgreich als nicht abgerechnet markiert.</target>
+      </trans-unit>
+      <trans-unit id="a002" resname="abrechnung.no_selection">
+        <source>abrechnung.no_selection</source>
+        <target>Keine Einträge ausgewählt.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
