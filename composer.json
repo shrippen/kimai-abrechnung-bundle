@@ -1,0 +1,33 @@
+{
+    "name": "arianw/kimai-abrechnung-bundle",
+    "description": "Kimai plugin: Billing overview for billable, unfinished-export timesheets grouped by customer",
+    "type": "kimai-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "kimai",
+        "kimai-plugin",
+        "billing",
+        "abrechnung",
+        "export"
+    ],
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Arian"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "extra": {
+        "kimai": {
+            "require": 26500,
+            "name": "Abrechnung"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "KimaiPlugin\\AbrechnungBundle\\": ""
+        }
+    }
+}

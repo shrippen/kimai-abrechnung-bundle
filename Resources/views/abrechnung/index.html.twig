@@ -1,0 +1,212 @@
+{% extends 'base.html.twig' %}
+{% import "macros/widgets.html.twig" as widgets %}
+
+{% block page_content %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" action="{{ path('abrechnung_index') }}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label">Monat</label>
+                    <select name="month" class="form-select form-select-sm">
+                        <option value="">Alle</option>
+                        {% for m in 1..12 %}
+                            <option value="{{ m }}"{% if filter_month == m %} selected{% endif %}>{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Jahr</label>
+                    <select name="year" class="form-select form-select-sm">
+                        <option value="">Alle</option>
+                        {% for y in range("now"|date("Y"), "now"|date("Y") - 3, -1) %}
+                            <option value="{{ y }}"{% if filter_year == y %} selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Kunde</label>
+                    <select name="customer" class="form-select form-select-sm">
+                        <option value="">Alle</option>
+                        {% for c in customers %}
+                            <option value="{{ c.id }}"{% if filter_customer == c.id %} selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Mitarbeiter</label>
+                    <select name="user" class="form-select form-select-sm">
+                        <option value="">Alle</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}"{% if filter_user == u.id %} selected{% endif %}>{{ u.displayName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-primary">Filtern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if groups|length > 0 %}
+    <div class="mb-3">
+        <button type="button" class="btn btn-success abrechnung-bulk-toggle"
+                data-ids='[{% for cid, group in groups %}{% for pid, proj in group.projects %}{% for item in proj.items %}{{ item.id }},{% endfor %}{% endfor %}{% endfor %}]'>
+            Alle sichtbaren abrechnen
+        </button>
+    </div>
+    {% endif %}
+
+    {% for cid, group in groups %}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>
+                {{ widgets.label_dot(group.customer.name, group.customer.color) }}
+                <span class="text-muted ms-2">{{ group.totalDuration|duration }} &middot; {{ group.totalRate|money(group.customer.currency) }}</span>
+            </span>
+            <button type="button" class="btn btn-sm btn-success abrechnung-bulk-toggle"
+                    data-ids='[{% for pid, proj in group.projects %}{% for item in proj.items %}{{ item.id }},{% endfor %}{% endfor %}]'>
+                Kunde abrechnen
+            </button>
+        </div>
+        {% for pid, proj in group.projects %}
+        <div class="border-top">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2">
+                <span>
+                    {{ widgets.label_dot(proj.project.name, proj.project.color) }}
+                    <span class="text-muted ms-2">{{ proj.totalDuration|duration }} &middot; {{ proj.totalRate|money(group.customer.currency) }}</span>
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-success abrechnung-bulk-toggle"
+                        data-ids='[{% for item in proj.items %}{{ item.id }},{% endfor %}]'>
+                    Projekt abrechnen
+                </button>
+            </div>
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Beschreibung</th>
+                        <th>Mitarbeiter</th>
+                        <th class="text-end">Dauer</th>
+                        <th class="text-end">Betrag</th>
+                        <th style="width:160px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in proj.items %}
+                    <tr id="row-{{ item.id }}">
+                        <td>{{ item.begin|date('Y-m-d') }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.user.displayName }}</td>
+                        <td class="text-end">{{ item.duration|duration }}</td>
+                        <td class="text-end">{{ item.rate|money(group.customer.currency) }}</td>
+                        <td class="text-end">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-success abrechnung-single-toggle"
+                                    data-id="{{ item.id }}">
+                                Eintrag abrechnen
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center text-muted py-4">Keine offenen Positionen.</div>
+    </div>
+    {% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('kimai.initialized', function() {
+        var undoLabel = 'Rückgängig';
+        var markUrl = '{{ path("abrechnung_mark") }}';
+
+        function applyRowState(id, exported) {
+            var row = document.getElementById('row-' + id);
+            if (!row) return;
+            var btn = row.querySelector('.abrechnung-single-toggle');
+            if (exported) {
+                row.classList.add('text-decoration-line-through', 'text-muted');
+                if (btn) { btn.classList.remove('btn-outline-success'); btn.classList.add('btn-outline-warning'); btn.textContent = undoLabel; }
+            } else {
+                row.classList.remove('text-decoration-line-through', 'text-muted');
+                if (btn) { btn.classList.remove('btn-outline-warning'); btn.classList.add('btn-outline-success'); btn.textContent = 'Eintrag abrechnen'; }
+            }
+        }
+
+        function refreshBulkButtons() {
+            document.querySelectorAll('.abrechnung-bulk-toggle').forEach(function(btn) {
+                var ids = btn.dataset.ids.replace(/\]/g,'').replace(/\[/g,'').split(',').filter(function(v){return v.trim()!=='';}).map(Number);
+                var allExported = ids.length > 0;
+                var noneExported = true;
+                ids.forEach(function(id) {
+                    var row = document.getElementById('row-' + id);
+                    if (row) {
+                        if (!row.classList.contains('text-decoration-line-through')) allExported = false;
+                        if (row.classList.contains('text-decoration-line-through')) noneExported = false;
+                    }
+                });
+                if (allExported) {
+                    btn.dataset.marked = '1';
+                    btn.classList.remove('btn-success', 'btn-outline-success');
+                    btn.classList.add('btn-outline-warning');
+                    btn.textContent = undoLabel;
+                } else {
+                    btn.dataset.marked = '0';
+                    btn.classList.remove('btn-outline-warning');
+                    btn.classList.add(btn.dataset.originalClass);
+                    btn.textContent = btn.dataset.originalLabel;
+                }
+            });
+        }
+
+        function sendToggle(ids, callback) {
+            var fd = new FormData();
+            ids.forEach(function(id) { fd.append('timesheets[]', id); });
+            fetch(markUrl, {
+                method: 'POST', body: fd,
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            }).then(function(r) { return r.json(); }).then(callback);
+        }
+
+        document.querySelectorAll('.abrechnung-single-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var id = parseInt(this.dataset.id);
+                var self = this;
+                sendToggle([id], function(data) {
+                    if (data.success && data.states) {
+                        Object.keys(data.states).forEach(function(k) {
+                            applyRowState(parseInt(k), data.states[k]);
+                        });
+                        refreshBulkButtons();
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('.abrechnung-bulk-toggle').forEach(function(btn) {
+            btn.dataset.originalLabel = btn.textContent.trim();
+            btn.dataset.originalClass = btn.classList.contains('btn-success') ? 'btn-success' : 'btn-outline-success';
+            btn.dataset.marked = '0';
+            btn.addEventListener('click', function() {
+                var raw = this.dataset.ids.replace(/\]/g,'').replace(/\[/g,'').split(',').filter(function(v){return v.trim()!=='';}).map(Number);
+                sendToggle(raw, function(data) {
+                    if (data.success && data.states) {
+                        Object.keys(data.states).forEach(function(k) {
+                            applyRowState(parseInt(k), data.states[k]);
+                        });
+                        refreshBulkButtons();
+                    }
+                });
+            });
+        });
+    });
+    </script>
+{% endblock %}
