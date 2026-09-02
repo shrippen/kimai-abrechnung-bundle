@@ -86,6 +86,7 @@
                     <tr>
                         <th>Datum</th>
                         <th>Beschreibung</th>
+                        <th>Tätigkeit</th>
                         <th>Mitarbeiter</th>
                         <th class="text-end">Dauer</th>
                         <th class="text-end">Betrag</th>
@@ -97,6 +98,7 @@
                     <tr id="row-{{ item.id }}">
                         <td>{{ item.begin|date('Y-m-d') }}</td>
                         <td>{{ item.description }}</td>
+                        <td>{{ item.activity.name }}</td>
                         <td>{{ item.user.displayName }}</td>
                         <td class="text-end">{{ item.duration|duration }}</td>
                         <td class="text-end">{{ item.rate|money(group.customer.currency) }}</td>
