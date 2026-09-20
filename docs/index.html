@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abrechnung — Kimai billing overview plugin</title>
+<meta name="description" content="Kimai plugin that lists all billable, not yet exported timesheet entries grouped by customer and project.">
+<meta property="og:title" content="Abrechnung — Kimai billing overview plugin">
+<meta property="og:description" content="Kimai plugin that lists all billable, not yet exported timesheet entries grouped by customer and project.">
+<meta property="og:image" content="https://shrippen.github.io/kimai-abrechnung-bundle/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:url" content="https://shrippen.github.io/kimai-abrechnung-bundle/">
+<link rel="icon" href="icon.svg">
+<script defer src="https://um.arianw.de/script.js" data-website-id="056d39ee-6a9d-4b14-9902-5a1ac399df08"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://shrippen.github.io/DesignDefault/v1/shrippen.css">
+<script src="https://shrippen.github.io/DesignDefault/v1/shrippen.js"></script>
+</head>
+<body>
+
+<nav class="nav"><div class="nav-inner">
+  <a class="nav-brand" href="#"><img src="icon.svg" alt="">Abrechnung</a>
+  <div class="nav-links">
+    <a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a><a class="nav-hl" href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="de" aria-pressed="false">DE</button>
+    </div>
+  </div>
+</div></nav>
+
+<header class="hero">
+  <img class="hero-wm" src="icon-mono.svg" alt="" aria-hidden="true">
+  <div class="hero-main">
+    <h1 style="--title-size:clamp(2.8rem,9.4vw,7.5rem);--title-size-narrow:clamp(2.5rem,15.4vw,13.1rem)">Kimai <br class="split">Abrechnung</h1>
+    <p class="tagline" lang="en">Kimai plugin for a billing overview. Shows all billable, not yet exported timesheet entries, grouped by customer and project.</p><p class="tagline" lang="de">Kimai-Plugin für die Abrechnungsübersicht. Zeigt alle abrechenbaren, noch nicht exportierten Zeiteinträge – gruppiert nach Kunde und Projekt.</p>
+  </div>
+  <div class="hero-side">
+    <div class="install-card">
+      <label><span lang="en">Install</span><span lang="de">Installation</span></label><div class="cmd-row"><div class="cmd-box">cd /var/plugins/ &amp;&amp; git clone https://github.com/shrippen/kimai-abrechnung-bundle.git AbrechnungBundle &amp;&amp; docker restart kimai_app</div><button class="copy-btn" type="button" title="Copy" aria-label="Copy"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+      <p class="install-note" lang="en">Or copy the <code>AbrechnungBundle</code> folder to <code>/var/plugins/</code> and restart the container or run <code>bin/console cache:clear --env=prod</code>. The menu item “Abrechnung” appears under “Rechnungen”.</p><p class="install-note" lang="de">Oder kopiere den Ordner <code>AbrechnungBundle</code> nach <code>/var/plugins/</code> und starte den Container neu oder führe <code>bin/console cache:clear --env=prod</code> aus. Der Menüpunkt „Abrechnung“ erscheint unter „Rechnungen“.</p>
+      <div class="install-links"><a class="btn btn-primary" href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a></div>
+    </div>
+    
+  </div>
+</header>
+
+<main>
+
+
+<section class="features" id="features">
+  <div class="feat" data-tier="red">
+    <span class="feat-tag"><span lang="en">Overview</span><span lang="de">Übersicht</span></span>
+    <h3 lang="en">All open entries</h3><h3 lang="de">Alle offenen Einträge</h3>
+    <p lang="en">Lists every billable, not yet exported and finished timesheet entry.</p><p lang="de">Listet jeden abrechenbaren, noch nicht exportierten und beendeten Zeiteintrag.</p>
+  </div>
+  <div class="feat" data-tier="yellow">
+    <span class="feat-tag"><span lang="en">Grouping</span><span lang="de">Gruppierung</span></span>
+    <h3 lang="en">Customer → Project → Entries</h3><h3 lang="de">Kunde → Projekt → Einträge</h3>
+    <p lang="en">Entries are grouped by customer and project, with Kimai’s own color circles.</p><p lang="de">Einträge sind nach Kunde und Projekt gruppiert, mit den Farbkreisen von Kimai.</p>
+  </div>
+  <div class="feat" data-tier="blue">
+    <span class="feat-tag"><span lang="en">Filters</span><span lang="de">Filter</span></span>
+    <h3 lang="en">Month, year, customer, user</h3><h3 lang="de">Monat, Jahr, Kunde, Mitarbeiter</h3>
+    <p lang="en">Narrow the list to the period, customer or employee you want to bill.</p><p lang="de">Grenze die Liste auf Zeitraum, Kunde oder Mitarbeiter ein, die du abrechnen willst.</p>
+  </div>
+  <div class="feat" data-tier="red">
+    <span class="feat-tag">AJAX</span>
+    <h3 lang="en">Bill without reloading</h3><h3 lang="de">Abrechnen ohne Neuladen</h3>
+    <p lang="en">Mark an entry, a project, a customer or everything as billed without a page reload.</p><p lang="de">Markiere einen Eintrag, ein Projekt, einen Kunden oder alles als abgerechnet, ohne die Seite neu zu laden.</p>
+  </div>
+  <div class="feat" data-tier="yellow">
+    <span class="feat-tag"><span lang="en">Undo</span><span lang="de">Rückgängig</span></span>
+    <h3 lang="en">Struck-through entries</h3><h3 lang="de">Durchgestrichene Einträge</h3>
+    <p lang="en">Billed entries are struck through and can be undone with one click.</p><p lang="de">Abgerechnete Einträge werden durchgestrichen und lassen sich mit einem Klick zurücknehmen.</p>
+  </div>
+  <div class="feat" data-tier="blue">
+    <span class="feat-tag">Kimai</span>
+    <h3 lang="en">Native menu item</h3><h3 lang="de">Eigener Menüpunkt</h3>
+    <p lang="en">Sits in the sidebar under “Rechnungen” and uses Kimai’s existing styling.</p><p lang="de">Sitzt in der Seitenleiste unter „Rechnungen“ und nutzt das vorhandene Kimai-Styling.</p>
+  </div>
+</section>
+<section class="section">
+  <h2 lang="en">Requirements</h2><h2 lang="de">Voraussetzungen</h2>
+  <ul lang="en"><li>Kimai ≥ 2.65.0</li><li>PHP ≥ 8.1</li></ul><ul lang="de"><li>Kimai ≥ 2.65.0</li><li>PHP ≥ 8.1</li></ul>
+</section>
+<section class="section" id="permissions">
+  <h2 lang="en">Permissions</h2><h2 lang="de">Rechte</h2>
+  <p lang="en">The plugin uses existing Kimai permissions.</p><p lang="de">Das Plugin nutzt vorhandene Kimai-Berechtigungen.</p>
+  <div class="table-wrap"><table class="table"><thead><tr><th><span lang="en">Action</span><span lang="de">Aktion</span></th><th><span lang="en">Permission</span><span lang="de">Berechtigung</span></th></tr></thead><tbody><tr><td><span lang="en">Show page</span><span lang="de">Seite anzeigen</span></td><td><code>view_invoice</code></td></tr><tr><td><span lang="en">Bill / unbill entries</span><span lang="de">Einträge abrechnen / abwählen</span></td><td><code>edit_export_own_timesheet</code> / <code>edit_export_other_timesheet</code></td></tr><tr><td><span lang="en">Unbill already exported entries</span><span lang="de">Bereits exportierte Einträge abwählen</span></td><td><code>edit_exported_timesheet</code></td></tr></tbody></table></div>
+</section>
+<section class="section" id="tech">
+  <h2 lang="en">Technology</h2><h2 lang="de">Technik</h2>
+  <ul lang="en"><li><strong>No own database</strong> — uses the existing <code>exported</code> flag of the timesheet entity</li><li><strong>AJAX endpoint</strong> — POST <code>/de/abrechnung/mark</code> with <code>X-Requested-With: XMLHttpRequest</code></li><li><strong>Persistence</strong> — <code>TimesheetService::saveTimesheet()</code>, the same code path as Kimai’s export button</li><li><strong>Rollback</strong> — delete the plugin folder and restart the container; no migrations needed</li></ul><ul lang="de"><li><strong>Keine eigene Datenbank</strong> – nutzt das vorhandene <code>exported</code>-Flag der Timesheet-Entität</li><li><strong>AJAX-Endpunkt</strong> – POST <code>/de/abrechnung/mark</code> mit <code>X-Requested-With: XMLHttpRequest</code></li><li><strong>Persistenz</strong> – <code>TimesheetService::saveTimesheet()</code>, derselbe Codepfad wie beim Export-Button von Kimai</li><li><strong>Rollback</strong> – Plugin-Ordner löschen und Container neu starten; keine Migrationen nötig</li></ul>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <img src="icon.svg" alt="">
+      <div><span class="foot-name">Abrechnung</span><span class="foot-tag"><span lang="en">Billing overview for Kimai</span><span lang="de">Abrechnungsübersicht für Kimai</span></span></div>
+    </div>
+    <nav class="foot-cols" aria-label="Footer">
+      <div><h4><span lang="en">Project</span><span lang="de">Projekt</span></h4><a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a></div>
+      <div><h4><span lang="en">Source</span><span lang="de">Quelltext</span></h4><a href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a><a href="https://github.com/shrippen/kimai-abrechnung-bundle/issues">Issues</a></div>
+    </nav>
+  </div>
+  <div class="foot-meta"><p>GPL-3.0-or-later · shrippen · v1.0.0</p></div>
+</footer>
+
+</body>
+</html>
