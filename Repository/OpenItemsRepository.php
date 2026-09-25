@@ -2,51 +2,59 @@
 
 namespace KimaiPlugin\AbrechnungBundle\Repository;
 
-use App\Entity\Customer;
 use App\Entity\Timesheet;
 use App\Entity\User;
 use App\Repository\Query\TimesheetQuery;
 use App\Repository\TimesheetRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use KimaiPlugin\AbrechnungBundle\Repository\Query\AbrechnungQuery;
 
 /**
- * Loads open (billable, not exported, stopped) timesheets through Kimai's own
- * TimesheetRepository, so team permissions are applied exactly like on the
- * timesheet and export pages.
+ * Loads billable, stopped timesheets (open = not exported, billed = exported) through Kimai's own
+ * TimesheetRepository, so team permissions are applied exactly like on the timesheet and export pages.
  */
 class OpenItemsRepository
 {
     public function __construct(
         private readonly TimesheetRepository $timesheetRepository,
-        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
     /**
-     * Find all billable, unexported, completed timesheets visible to $currentUser.
-     *
      * @return Timesheet[]
      */
-    public function findOpenItems(
+    public function findItems(
         User $currentUser,
-        ?User $user = null,
-        ?Customer $customer = null,
+        AbrechnungQuery $filter,
         ?\DateTimeInterface $dateFrom = null,
         ?\DateTimeInterface $dateTo = null,
     ): array {
         $query = new TimesheetQuery(false);
         $query->setCurrentUser($currentUser);
         $query->setBillable(true);
-        $query->setExported(TimesheetQuery::STATE_NOT_EXPORTED);
         $query->setState(TimesheetQuery::STATE_STOPPED);
-        $query->setOrderBy('begin');
-        $query->setOrder(TimesheetQuery::ORDER_ASC);
+        $query->setExported(match ($filter->getState()) {
+            AbrechnungQuery::STATE_BILLED => TimesheetQuery::STATE_EXPORTED,
+            AbrechnungQuery::STATE_ALL => TimesheetQuery::STATE_ALL,
+            default => TimesheetQuery::STATE_NOT_EXPORTED,
+        });
 
-        if ($user !== null) {
-            $query->setUser($user);
+        $orderBy = $filter->getOrderBy();
+        if ($orderBy === 'user') {
+            // TimesheetQuery has no user order; the page sorts by user within each project instead
+            $orderBy = 'begin';
+        }
+        $query->setOrderBy(\in_array($orderBy, TimesheetQuery::TIMESHEET_ORDER_ALLOWED, true) ? $orderBy : 'begin');
+        $query->setOrder($filter->getOrder());
+
+        if ($filter->hasSearchTerm()) {
+            $query->setSearchTerm($filter->getSearchTerm());
         }
 
-        if ($customer !== null) {
+        foreach ($filter->getUsers() as $user) {
+            $query->addUser($user);
+        }
+
+        foreach ($filter->getCustomers() as $customer) {
             $query->addCustomer($customer);
         }
 
@@ -59,55 +67,13 @@ class OpenItemsRepository
         }
 
         // Kimai batch-loads project, customer, activity and user of all rows (no N+1)
-        return $this->timesheetRepository->getTimesheetsForQuery($query);
-    }
+        $items = $this->timesheetRepository->getTimesheetsForQuery($query);
 
-    /**
-     * Group open items by customer (sorted by customer name).
-     *
-     * @return array<int, array{customer: Customer, items: Timesheet[]}>
-     */
-    public function findGroupedByCustomer(
-        User $currentUser,
-        ?User $user = null,
-        ?Customer $customer = null,
-        ?\DateTimeInterface $dateFrom = null,
-        ?\DateTimeInterface $dateTo = null,
-    ): array {
-        $groups = [];
-        foreach ($this->findOpenItems($currentUser, $user, $customer, $dateFrom, $dateTo) as $item) {
-            $itemCustomer = $item->getProject()->getCustomer();
-            $customerId = $itemCustomer->getId();
-            if (!isset($groups[$customerId])) {
-                $groups[$customerId] = [
-                    'customer' => $itemCustomer,
-                    'items' => [],
-                ];
-            }
-            $groups[$customerId]['items'][] = $item;
+        if ($filter->getOrderBy() === 'user') {
+            $direction = $filter->getOrder() === AbrechnungQuery::ORDER_DESC ? -1 : 1;
+            usort($items, fn (Timesheet $a, Timesheet $b) => $direction * (strcasecmp((string) $a->getUser()?->getDisplayName(), (string) $b->getUser()?->getDisplayName()) ?: ($a->getBegin() <=> $b->getBegin())));
         }
 
-        uasort($groups, fn (array $a, array $b) => strcasecmp((string) $a['customer']->getName(), (string) $b['customer']->getName()));
-
-        return $groups;
-    }
-
-    /**
-     * Year of the oldest open item (for the year filter), null if there is none.
-     */
-    public function findOldestOpenYear(): ?int
-    {
-        $min = $this->entityManager->createQueryBuilder()
-            ->select('MIN(t.begin)')
-            ->from(Timesheet::class, 't')
-            ->where('t.billable = :billable')
-            ->andWhere('t.exported = :exported')
-            ->andWhere('t.end IS NOT NULL')
-            ->setParameter('billable', true)
-            ->setParameter('exported', false)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        return $min === null ? null : (int) substr((string) $min, 0, 4);
+        return $items;
     }
 }

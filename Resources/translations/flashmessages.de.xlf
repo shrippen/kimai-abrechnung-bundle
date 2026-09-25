@@ -2,29 +2,13 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundleFlash">
     <body>
-      <trans-unit id="a000" resname="abrechnung.marked_success">
-        <source>abrechnung.marked_success</source>
-        <target>Einträge erfolgreich als abgerechnet markiert.</target>
-      </trans-unit>
-      <trans-unit id="a001" resname="abrechnung.unmarked_success">
-        <source>abrechnung.unmarked_success</source>
-        <target>Auswahl erfolgreich als nicht abgerechnet markiert.</target>
-      </trans-unit>
-      <trans-unit id="a002" resname="abrechnung.no_selection">
+      <trans-unit id="f000" resname="abrechnung.no_selection">
         <source>abrechnung.no_selection</source>
-        <target>Keine Einträge ausgewählt.</target>
+        <target>Keine Einträge ausgewählt. Mindestens einen Eintrag auswählen.</target>
       </trans-unit>
-      <trans-unit id="a003" resname="abrechnung.invalid_action">
+      <trans-unit id="f001" resname="abrechnung.invalid_action">
         <source>abrechnung.invalid_action</source>
-        <target>Ungültige Aktion.</target>
-      </trans-unit>
-      <trans-unit id="a004" resname="abrechnung.skipped">
-        <source>abrechnung.skipped</source>
-        <target>Einige Einträge wurden mangels Berechtigung übersprungen.</target>
-      </trans-unit>
-      <trans-unit id="a005" resname="abrechnung.failed">
-        <source>abrechnung.failed</source>
-        <target>Einige Einträge konnten nicht gespeichert werden.</target>
+        <target>Ungültige Aktion. Seite neu laden und erneut versuchen.</target>
       </trans-unit>
     </body>
   </file>

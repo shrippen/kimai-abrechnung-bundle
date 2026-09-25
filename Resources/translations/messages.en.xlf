@@ -6,97 +6,177 @@
         <source>menu.abrechnung</source>
         <target>Billing</target>
       </trans-unit>
-      <trans-unit id="a001" resname="abrechnung.title">
-        <source>abrechnung.title</source>
-        <target>Billing overview</target>
+      <trans-unit id="a001" resname="abrechnung.page_title">
+        <source>abrechnung.page_title</source>
+        <target>Billing · %period%</target>
       </trans-unit>
-      <trans-unit id="a002" resname="abrechnung.month">
-        <source>abrechnung.month</source>
-        <target>Month</target>
+      <trans-unit id="a002" resname="abrechnung.period_all">
+        <source>abrechnung.period_all</source>
+        <target>All periods</target>
       </trans-unit>
-      <trans-unit id="a003" resname="abrechnung.year">
-        <source>abrechnung.year</source>
-        <target>Year</target>
-      </trans-unit>
-      <trans-unit id="a004" resname="abrechnung.customer">
+      <trans-unit id="a003" resname="abrechnung.customer">
         <source>abrechnung.customer</source>
         <target>Customer</target>
       </trans-unit>
-      <trans-unit id="a005" resname="abrechnung.user">
+      <trans-unit id="a004" resname="abrechnung.user">
         <source>abrechnung.user</source>
         <target>User</target>
       </trans-unit>
-      <trans-unit id="a006" resname="abrechnung.all">
-        <source>abrechnung.all</source>
-        <target>All</target>
-      </trans-unit>
-      <trans-unit id="a007" resname="abrechnung.date">
+      <trans-unit id="a005" resname="abrechnung.date">
         <source>abrechnung.date</source>
         <target>Date</target>
       </trans-unit>
-      <trans-unit id="a008" resname="abrechnung.project">
+      <trans-unit id="a006" resname="abrechnung.project">
         <source>abrechnung.project</source>
         <target>Project</target>
       </trans-unit>
-      <trans-unit id="a009" resname="abrechnung.description">
-        <source>abrechnung.description</source>
-        <target>Description</target>
-      </trans-unit>
-      <trans-unit id="a010" resname="abrechnung.duration">
-        <source>abrechnung.duration</source>
-        <target>Duration</target>
-      </trans-unit>
-      <trans-unit id="a011" resname="abrechnung.amount">
-        <source>abrechnung.amount</source>
-        <target>Amount</target>
-      </trans-unit>
-      <trans-unit id="a012" resname="abrechnung.empty">
-        <source>abrechnung.empty</source>
-        <target>No open items – everything is billed! 🎉</target>
-      </trans-unit>
-      <trans-unit id="a013" resname="abrechnung.mark_all_visible">
-        <source>abrechnung.mark_all_visible</source>
-        <target>Bill all visible</target>
-      </trans-unit>
-      <trans-unit id="a014" resname="abrechnung.mark_customer">
-        <source>abrechnung.mark_customer</source>
-        <target>Bill customer</target>
-      </trans-unit>
-      <trans-unit id="a015" resname="abrechnung.mark_project">
-        <source>abrechnung.mark_project</source>
-        <target>Bill project</target>
-      </trans-unit>
-      <trans-unit id="a016" resname="abrechnung.mark_entry">
-        <source>abrechnung.mark_entry</source>
-        <target>Bill entry</target>
-      </trans-unit>
-      <trans-unit id="a017" resname="abrechnung.undo">
-        <source>abrechnung.undo</source>
-        <target>Undo</target>
-      </trans-unit>
-      <trans-unit id="a018" resname="abrechnung.activity">
+      <trans-unit id="a007" resname="abrechnung.activity">
         <source>abrechnung.activity</source>
         <target>Activity</target>
       </trans-unit>
-      <trans-unit id="a019" resname="abrechnung.filter">
-        <source>abrechnung.filter</source>
-        <target>Filter</target>
+      <trans-unit id="a008" resname="abrechnung.description">
+        <source>abrechnung.description</source>
+        <target>Description</target>
       </trans-unit>
-      <trans-unit id="a020" resname="abrechnung.error_title">
-        <source>abrechnung.error_title</source>
-        <target>Billing failed</target>
+      <trans-unit id="a009" resname="abrechnung.duration">
+        <source>abrechnung.duration</source>
+        <target>Duration</target>
       </trans-unit>
-      <trans-unit id="a021" resname="abrechnung.error_request">
-        <source>abrechnung.error_request</source>
-        <target>The request failed, please reload the page.</target>
+      <trans-unit id="a010" resname="abrechnung.amount">
+        <source>abrechnung.amount</source>
+        <target>Amount</target>
       </trans-unit>
-      <trans-unit id="a022" resname="abrechnung.error_skipped">
-        <source>abrechnung.error_skipped</source>
-        <target>No permission for entries: %ids%</target>
+      <trans-unit id="a011" resname="abrechnung.state">
+        <source>abrechnung.state</source>
+        <target>Status</target>
       </trans-unit>
-      <trans-unit id="a023" resname="abrechnung.error_failed">
-        <source>abrechnung.error_failed</source>
-        <target>Saving failed for entries: %ids%</target>
+      <trans-unit id="a012" resname="abrechnung.state_open">
+        <source>abrechnung.state_open</source>
+        <target>Open</target>
+      </trans-unit>
+      <trans-unit id="a013" resname="abrechnung.state_billed">
+        <source>abrechnung.state_billed</source>
+        <target>Billed</target>
+      </trans-unit>
+      <trans-unit id="a014" resname="abrechnung.state_all">
+        <source>abrechnung.state_all</source>
+        <target>All</target>
+      </trans-unit>
+      <trans-unit id="a015" resname="abrechnung.mark">
+        <source>abrechnung.mark</source>
+        <target>Mark as billed</target>
+      </trans-unit>
+      <trans-unit id="a016" resname="abrechnung.unmark">
+        <source>abrechnung.unmark</source>
+        <target>Reopen</target>
+      </trans-unit>
+      <trans-unit id="a017" resname="abrechnung.select">
+        <source>abrechnung.select</source>
+        <target>Select</target>
+      </trans-unit>
+      <trans-unit id="a018" resname="abrechnung.select_group">
+        <source>abrechnung.select_group</source>
+        <target>Select all entries of %name%</target>
+      </trans-unit>
+      <trans-unit id="a019" resname="abrechnung.only_customer">
+        <source>abrechnung.only_customer</source>
+        <target>Show only this customer</target>
+      </trans-unit>
+      <trans-unit id="a020" resname="abrechnung.mark_all_visible">
+        <source>abrechnung.mark_all_visible</source>
+        <target>Mark all visible as billed</target>
+      </trans-unit>
+      <trans-unit id="a021" resname="abrechnung.open_export">
+        <source>abrechnung.open_export</source>
+        <target>Open in Kimai export</target>
+      </trans-unit>
+      <trans-unit id="a022" resname="abrechnung.kpi.duration_open">
+        <source>abrechnung.kpi.duration_open</source>
+        <target>Open</target>
+      </trans-unit>
+      <trans-unit id="a023" resname="abrechnung.kpi.amount_open">
+        <source>abrechnung.kpi.amount_open</source>
+        <target>Open amount</target>
+      </trans-unit>
+      <trans-unit id="a024" resname="abrechnung.kpi.duration_billed">
+        <source>abrechnung.kpi.duration_billed</source>
+        <target>Billed</target>
+      </trans-unit>
+      <trans-unit id="a025" resname="abrechnung.kpi.amount_billed">
+        <source>abrechnung.kpi.amount_billed</source>
+        <target>Billed amount</target>
+      </trans-unit>
+      <trans-unit id="a026" resname="abrechnung.kpi.duration_all">
+        <source>abrechnung.kpi.duration_all</source>
+        <target>Duration</target>
+      </trans-unit>
+      <trans-unit id="a027" resname="abrechnung.kpi.amount_all">
+        <source>abrechnung.kpi.amount_all</source>
+        <target>Amount</target>
+      </trans-unit>
+      <trans-unit id="a028" resname="abrechnung.kpi.entries">
+        <source>abrechnung.kpi.entries</source>
+        <target>Entries</target>
+      </trans-unit>
+      <trans-unit id="a029" resname="abrechnung.kpi.customers">
+        <source>abrechnung.kpi.customers</source>
+        <target>Customers</target>
+      </trans-unit>
+      <trans-unit id="a030" resname="abrechnung.kpi.duration_hint">
+        <source>abrechnung.kpi.duration_hint</source>
+        <target>{1}in 1 entry|]1,Inf[in %count% entries</target>
+      </trans-unit>
+      <trans-unit id="a031" resname="abrechnung.empty_open">
+        <source>abrechnung.empty_open</source>
+        <target>No open entries.</target>
+      </trans-unit>
+      <trans-unit id="a032" resname="abrechnung.empty_billed">
+        <source>abrechnung.empty_billed</source>
+        <target>No billed entries.</target>
+      </trans-unit>
+      <trans-unit id="a033" resname="abrechnung.empty_all">
+        <source>abrechnung.empty_all</source>
+        <target>No billable entries.</target>
+      </trans-unit>
+      <trans-unit id="a034" resname="abrechnung.reset_filter">
+        <source>abrechnung.reset_filter</source>
+        <target>Reset filter</target>
+      </trans-unit>
+      <trans-unit id="a035" resname="abrechnung.show_billed">
+        <source>abrechnung.show_billed</source>
+        <target>Show billed entries</target>
+      </trans-unit>
+      <trans-unit id="a036" resname="abrechnung.search_context">
+        <source>abrechnung.search_context</source>
+        <target>Search: %term%</target>
+      </trans-unit>
+      <trans-unit id="a037" resname="abrechnung.result.marked">
+        <source>abrechnung.result.marked</source>
+        <target>{1}1 entry marked as billed|]1,Inf[%count% entries marked as billed</target>
+      </trans-unit>
+      <trans-unit id="a038" resname="abrechnung.result.unmarked">
+        <source>abrechnung.result.unmarked</source>
+        <target>{1}1 entry reopened|]1,Inf[%count% entries reopened</target>
+      </trans-unit>
+      <trans-unit id="a039" resname="abrechnung.result.unchanged">
+        <source>abrechnung.result.unchanged</source>
+        <target>Nothing changed, the entries already had this status</target>
+      </trans-unit>
+      <trans-unit id="a040" resname="abrechnung.result.skipped">
+        <source>abrechnung.result.skipped</source>
+        <target>{1}1 entry skipped: no permission|]1,Inf[%count% entries skipped: no permission</target>
+      </trans-unit>
+      <trans-unit id="a041" resname="abrechnung.result.failed">
+        <source>abrechnung.result.failed</source>
+        <target>{1}1 entry not saved, reload the page and try again|]1,Inf[%count% entries not saved, reload the page and try again</target>
+      </trans-unit>
+      <trans-unit id="a100" resname="abrechnung.all_customers">
+        <source>abrechnung.all_customers</source>
+        <target>All customers</target>
+      </trans-unit>
+      <trans-unit id="a101" resname="abrechnung.all_users">
+        <source>abrechnung.all_users</source>
+        <target>All users</target>
       </trans-unit>
     </body>
   </file>

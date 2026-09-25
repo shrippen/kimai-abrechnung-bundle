@@ -2,29 +2,13 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file source-language="en" target-language="en" datatype="plaintext" original="AbrechnungBundleFlash">
     <body>
-      <trans-unit id="a000" resname="abrechnung.marked_success">
-        <source>abrechnung.marked_success</source>
-        <target>Entries successfully marked as billed.</target>
-      </trans-unit>
-      <trans-unit id="a001" resname="abrechnung.unmarked_success">
-        <source>abrechnung.unmarked_success</source>
-        <target>Selection successfully marked as not billed.</target>
-      </trans-unit>
-      <trans-unit id="a002" resname="abrechnung.no_selection">
+      <trans-unit id="f000" resname="abrechnung.no_selection">
         <source>abrechnung.no_selection</source>
-        <target>No entries selected.</target>
+        <target>No entries selected. Select at least one entry.</target>
       </trans-unit>
-      <trans-unit id="a003" resname="abrechnung.invalid_action">
+      <trans-unit id="f001" resname="abrechnung.invalid_action">
         <source>abrechnung.invalid_action</source>
-        <target>Invalid action.</target>
-      </trans-unit>
-      <trans-unit id="a004" resname="abrechnung.skipped">
-        <source>abrechnung.skipped</source>
-        <target>Some entries were skipped due to missing permissions.</target>
-      </trans-unit>
-      <trans-unit id="a005" resname="abrechnung.failed">
-        <source>abrechnung.failed</source>
-        <target>Some entries could not be saved.</target>
+        <target>Invalid action. Reload the page and try again.</target>
       </trans-unit>
     </body>
   </file>

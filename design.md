@@ -22,35 +22,28 @@ Das Plugin zeigt offene Positionen und ermöglicht das Abhaken.
 
 ## UI-Struktur
 
-### Gruppierung
-- Kunde → Projekt → Einträge
-- Jede Ebene zeigt Summen (Dauer + Betrag)
+Verbindlich ist der gemeinsame UI-Leitfaden [kimai-plugin-ui](https://github.com/shrippen/kimai-plugin-ui)
+(`GUIDELINES.md`, `CHECKLIST.md`). Hier steht nur, wie die Abrechnung ihn umsetzt; bei Widerspruch gilt der Leitfaden.
 
-### Button-Typen
-1. **"Eintrag abrechnen"** (pro Zeile) – einzelnen Eintrag abrechnen / zurücknehmen
-2. **"Projekt abrechnen"** (pro Projektgruppe) – alle Einträge des Projekts
-3. **"Kunde abrechnen"** (pro Kundengruppe) – alle Einträge des Kunden
-4. **"Alle sichtbaren abrechnen"** (oben) – alle sichtbaren Einträge
+### Seitenkopf
+- Titel „Abrechnung · <Zeitraum>“, Kontextzeile (Status · Kunden · Benutzer · Suche) über `kit.context_line`
+- Seitenaktionen über `PageActionsEvent` (`AbrechnungActionsSubscriber`): „Alle sichtbaren abrechnen“, „Im Kimai-Export öffnen“
+- Zeitraum über `kit.period_nav` (Monat | Jahr). „Alle Zeiträume“ ist keine Einheit, sondern der Zustand ohne Zeitraum-Filter
+  (Standard); zurück dorthin über Kimais „Filter entfernen“
+- Filter über Kimais Toolbar (`DataTable::setSearchForm()`): Suche, Kunden, Benutzer, Status (Offen/Abgerechnet/Alle), Sortierung
 
-### AJAX-Verhalten
-- Alle Buttons nutzen AJAX (fetch mit `X-Requested-With: XMLHttpRequest`)
-- Kein Seitenreload – Einträge werden visuell durchgestrichen
-- Button wechselt zu "Rückgängig" (gelb)
-- Zweiter Klick → zurücknehmen (Normalzustand)
-- Der Client schickt immer die gewünschte Aktion (`action=mark|unmark`), der Server setzt den Status (kein Toggle). Doppelklicks oder Bulk über teils markierte Einträge können so nichts versehentlich zurücknehmen
-- Fehler (HTTP/Netzwerk) und übersprungene/fehlgeschlagene IDs werden per Kimai-Alert angezeigt
-- **Statusbasiert**: Server liefert `states: {id: bool}` – Client aktualisiert alle Buttons basierend auf tatsächlichem Zustand
-  - Kunde-Rückgängig → Projekt-Button wechselt ebenfalls zurück (wenn nicht alle Einträge markiert)
+### Liste
+- Kunde → Projekt → Einträge; Kunde als `kit.group_header` (Kartenkopf), Projekt als Zwischenzeile (`as_row`, `level: 2`),
+  beide mit Farbpunkt und Summen (Dauer, Betrag)
+- Zeilen mit Kimais `macros/datatables.html.twig` (Kopf/Fuß, Spaltenklassen für Mobil)
+- Auswahl per Checkbox (Kopf-Checkbox = ganzer Kunde) und Sammelleiste `kit.bulk_bar`; „…“ pro Zeile und Gruppe
 
-### Filter
-- Monat, Jahr, Kunde, Mitarbeiter
-- Filter werden per GET-Formular gesetzt; ungültige Werte (z. B. `month=13`) werden ignoriert statt einen Fehler zu erzeugen
-- Bei GET-Formular: normaler HTTP-Submit mit Redirect
-
-### Styling
-- Keine eigenen Farben – Kimai-Theming wird verwendet
-- Kunden- und Projekt-Farbcircles: `widgets.label_dot()` Macro aus Kimais `macros/widgets.html.twig`
-- Buttons: Kimai-Standard (btn-success, btn-outline-success, btn-outline-warning)
+### Abrechnen und Rückgängig
+- Abrechnen ist umkehrbar: sofort ausführen, Seite neu laden, Hinweis mit „Rückgängig“ (`KimaiPluginUi`-Toast → `action=unmark`)
+- Der Client schickt immer die gewünschte Aktion (`action=mark|unmark`), der Server setzt den Status (kein Toggle).
+  Doppelklicks oder Sammelaktionen über teils abgerechnete Einträge nehmen so nichts versehentlich zurück
+- Abgerechnete Einträge erscheinen nur mit Status-Filter „Abgerechnet“/„Alle“, als `kit.status_badge('billed')`
+- Fehler (keine Berechtigung, Speichern fehlgeschlagen) als Kimai-Alert mit übersetzter Meldung
 
 ## Berechtigungen (wiederverwendet)
 
@@ -76,25 +69,23 @@ Keine eigenen Permissions – vermeidet Rollen-Duplikate im Kimai-Admin.
 - `OpenItemsRepository`: nutzt `TimesheetRepository::getTimesheetsForQuery()` mit `TimesheetQuery` (`setCurrentUser()` → Team-Berechtigungen wie in Kimai; Kimai lädt Projekt/Kunde/Tätigkeit/User gebündelt)
 - Filter: billable, nicht exportiert, beendet
 - Monats-/Jahresgrenzen über `DateTimeFactory` in der Zeitzone des Users
-- Kunden-/Mitarbeiter-Dropdowns über `getQueryBuilderForFormType()` (sichtbare Kunden, aktive User, Team-Scoping); Filterwerte außerhalb dieser Listen werden ignoriert
+- Kunden-/Benutzer-Filter über Kimais `CustomerType`/`UserType` (sichtbare Kunden, aktive Benutzer, Team-Scoping); ungültige Werte setzt Kimais Suchformular zurück
 - Gruppierung in PHP (nach Customer → Project)
 
 ### Controller
 - `AbrechnungController`: GET-Index + POST-Mark
 - AJAX-Erkennung: `X-Requested-With: XMLHttpRequest` Header
 - CSRF-Token (`abrechnung.mark`) wird im AJAX- und Formular-Pfad geprüft
-- `action=mark|unmark` setzt `exported` für alle übergebenen IDs (idempotent); Rechte pro Eintrag über den Voter `edit_export`, Zurücknehmen zusätzlich `edit_exported_timesheet`
+- `action=mark|unmark` setzt `exported` für alle übergebenen IDs (idempotent); Rechte pro Eintrag über den Voter `edit_export`, Zurücknehmen zusätzlich `edit_exported_timesheet` – außer für Einträge, die dieselbe Sitzung vor höchstens 15 Minuten abgerechnet hat („Rückgängig“)
 - Fehler beim Speichern werden pro Eintrag abgefangen und gemeldet
-- Response: `{success, states: {id: bool, ...}, skipped: [id], failed: [id]}`
+- Response: `{success, states: {id: bool, ...}, changed: [id], skipped: [id], failed: [id], message, undo}`
 - Beträge nur mit `view_rate` (Voter) sichtbar; Summen werden ausgeblendet, sobald ein Eintrag der Gruppe verborgen ist
 
 ### Twig
-- Template erbt von `base.html.twig`
-- Importiert `macros/widgets.html.twig` für `label_dot()`
+- Template erbt von `base.html.twig`, nutzt das Kit (`@Abrechnung/_kit/macros.html.twig`) und Kimais `macros/widgets.html.twig` / `macros/datatables.html.twig`
 - JavaScript im `javascripts`-Block mit `kimai.initialized` Event-Listener
 
 ## Offene Punkte / Zukunft
 
 - Badge-Anzahl im Sidebar-Menü (optional, Tabler-kompatibel prüfen)
 - Export der Abrechnungsübersicht (CSV/PDF)
-- Zeitraum-Schnellauswahl (dieser Monat, letzter Monat, etc.)

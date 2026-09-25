@@ -1,228 +1,293 @@
 {% extends 'base.html.twig' %}
-{% import "macros/widgets.html.twig" as widgets %}
+{% import '@Abrechnung/_kit/macros.html.twig' as kit %}
+{% import 'macros/widgets.html.twig' as widgets %}
+{% import 'macros/datatables.html.twig' as tables %}
 
-{% block page_content %}
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="get" action="{{ path('abrechnung_index') }}" class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label" for="abrechnung-month">{{ 'abrechnung.month'|trans }}</label>
-                    <select name="month" id="abrechnung-month" class="form-select form-select-sm">
-                        <option value="">{{ 'abrechnung.all'|trans }}</option>
-                        {% for m, monthName in month_names() %}
-                            <option value="{{ m + 1 }}"{% if filter_month == m + 1 %} selected{% endif %}>{{ monthName }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label" for="abrechnung-year">{{ 'abrechnung.year'|trans }}</label>
-                    <select name="year" id="abrechnung-year" class="form-select form-select-sm">
-                        <option value="">{{ 'abrechnung.all'|trans }}</option>
-                        {% for y in years %}
-                            <option value="{{ y }}"{% if filter_year == y %} selected{% endif %}>{{ y }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label" for="abrechnung-customer">{{ 'abrechnung.customer'|trans }}</label>
-                    <select name="customer" id="abrechnung-customer" class="form-select form-select-sm">
-                        <option value="">{{ 'abrechnung.all'|trans }}</option>
-                        {% for c in customers %}
-                            <option value="{{ c.id }}"{% if filter_customer == c.id %} selected{% endif %}>{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label" for="abrechnung-user">{{ 'abrechnung.user'|trans }}</label>
-                    <select name="user" id="abrechnung-user" class="form-select form-select-sm">
-                        <option value="">{{ 'abrechnung.all'|trans }}</option>
-                        {% for u in users %}
-                            <option value="{{ u.id }}"{% if filter_user == u.id %} selected{% endif %}>{{ u.displayName }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-sm btn-primary">{{ 'abrechnung.filter'|trans }}</button>
-                </div>
-            </form>
-        </div>
+{% set state = query.state %}
+{% set bulk_form = 'abrechnung-bulk' %}
+{% set rate_shown = can_view_rate and not totals.rate_hidden %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include '@Abrechnung/_kit/assets.html.twig' with {kpu_part: 'css'} %}
+{% endblock %}
+
+{% block page_intro %}
+    {% set customer_names = query.customers|map(c => c.name)|join(', ') %}
+    {% set user_names = query.users|map(u => u.displayName)|join(', ') %}
+    {{ kit.context_line([
+        ('abrechnung.state_' ~ state)|trans,
+        customer_names is not empty ? customer_names : 'abrechnung.all_customers'|trans,
+        user_names is not empty ? user_names : 'abrechnung.all_users'|trans,
+        query.searchTerm is not null ? 'abrechnung.search_context'|trans({'%term%': query.searchTerm.originalSearch}) : null,
+    ]) }}
+    {{ parent() }}
+{% endblock %}
+
+{% block table_actions %}
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        {{ kit.period_nav(['month', 'year'], nav.unit, nav.label, nav.prev, nav.next, nav.today, nav.units) }}
+        {{ tables.actions(page_setup.dataTable) }}
     </div>
+{% endblock %}
 
-    {% if groups|length > 0 %}
-    <div class="mb-3">
-        <button type="button" class="btn btn-success abrechnung-bulk-toggle" data-ids="{{ all_ids|json_encode }}">
-            {{ 'abrechnung.mark_all_visible'|trans }}
-        </button>
-    </div>
-    {% endif %}
+{% block page_content_start %}
+    {{ kit.result_callouts() }}
+    {{ parent() }}
+{% endblock %}
 
-    {% for cid, group in groups %}
-    <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span>
-                {{ widgets.label_dot(group.customer.name, group.customer.color) }}
-                <span class="text-muted ms-2">{{ group.totalDuration|duration }}{% if not group.rateHidden %} &middot; {{ group.totalRate|money(group.customer.currency) }}{% endif %}</span>
-            </span>
-            <button type="button" class="btn btn-sm btn-success abrechnung-bulk-toggle" data-ids="{{ group.ids|json_encode }}">
-                {{ 'abrechnung.mark_customer'|trans }}
-            </button>
-        </div>
-        {% for pid, proj in group.projects %}
-        <div class="border-top">
-            <div class="d-flex justify-content-between align-items-center px-3 py-2">
-                <span>
-                    {{ widgets.label_dot(proj.project.name, proj.project.color) }}
-                    <span class="text-muted ms-2">{{ proj.totalDuration|duration }}{% if not proj.rateHidden %} &middot; {{ proj.totalRate|money(group.customer.currency) }}{% endif %}</span>
-                </span>
-                <button type="button" class="btn btn-sm btn-outline-success abrechnung-bulk-toggle" data-ids="{{ proj.ids|json_encode }}">
-                    {{ 'abrechnung.mark_project'|trans }}
-                </button>
-            </div>
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>{{ 'abrechnung.date'|trans }}</th>
-                        <th>{{ 'abrechnung.description'|trans }}</th>
-                        <th>{{ 'abrechnung.activity'|trans }}</th>
-                        <th>{{ 'abrechnung.user'|trans }}</th>
-                        <th class="text-end">{{ 'abrechnung.duration'|trans }}</th>
-                        <th class="text-end">{{ 'abrechnung.amount'|trans }}</th>
-                        <th style="width:160px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in proj.items %}
-                    <tr id="row-{{ item.id }}">
-                        <td>{{ item.begin|date_short }}</td>
-                        <td>{{ item.description }}</td>
-                        <td>{{ item.activity.name }}</td>
-                        <td>{{ item.user.displayName }}</td>
-                        <td class="text-end">{{ item.duration|duration }}</td>
-                        <td class="text-end">{% if rate_visible[item.id] %}{{ item.rate|money(group.customer.currency) }}{% else %}&ndash;{% endif %}</td>
-                        <td class="text-end">
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-success abrechnung-single-toggle"
-                                    data-id="{{ item.id }}">
-                                {{ 'abrechnung.mark_entry'|trans }}
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% block main %}
+    {% set tiles = [{
+        label: ('abrechnung.kpi.duration_' ~ state)|trans,
+        value: totals.duration|duration,
+        hint: 'abrechnung.kpi.duration_hint'|trans({'%count%': totals.count}),
+        highlight: not rate_shown,
+    }] %}
+    {% if rate_shown %}
+        {% set amounts = [] %}
+        {% for currency, amount in totals.amounts %}
+            {% set amounts = amounts|merge([amount|money(currency)]) %}
         {% endfor %}
-    </div>
+        {% set tiles = tiles|merge([{
+            label: ('abrechnung.kpi.amount_' ~ state)|trans,
+            value: amounts is empty ? 0|money : amounts|join(' · '),
+            highlight: true,
+        }]) %}
+    {% endif %}
+    {% set tiles = tiles|merge([
+        {label: 'abrechnung.kpi.entries'|trans, value: totals.count|amount},
+        {label: 'abrechnung.kpi.customers'|trans, value: totals.customers|amount},
+    ]) %}
+
+    <div id="abrechnung-page"
+         data-mark-url="{{ path('abrechnung_mark', {action: 'mark'}) }}"
+         data-unmark-url="{{ path('abrechnung_mark', {action: 'unmark'}) }}"
+         data-token="{{ csrf_token(csrf_token_id) }}"
+         data-markable="{{ markable_ids|json_encode }}"
+         data-error-title="{{ 'kpu.toast.error'|trans({}, 'kpu') }}">
+
+    {{ kit.kpi_bar(tiles) }}
+
+    {% if groups is empty %}
+        {% if query.countFilter() > 0 %}
+            {{ kit.empty_state(('abrechnung.empty_' ~ state)|trans, reset_url, 'abrechnung.reset_filter'|trans) }}
+        {% else %}
+            {{ kit.empty_state(('abrechnung.empty_' ~ state)|trans, billed_url, 'abrechnung.show_billed'|trans) }}
+        {% endif %}
     {% else %}
-    <div class="card">
-        <div class="card-body text-center text-muted py-4">{{ 'abrechnung.empty'|trans }}</div>
+        {% set show_status = state != 'open' %}
+        {% for cid, group in groups %}
+            {% set customer = group.customer %}
+            {% set currency = group.currency %}
+            {% set show_group_amount = can_view_rate and not group.rate_hidden %}
+
+            {% set customer_actions = {} %}
+            {% if group.markable_ids is not empty %}
+                {% set customer_actions = customer_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': group.markable_ids|json_encode}}}) %}
+            {% endif %}
+            {% if group.unmarkable_ids is not empty %}
+                {% set customer_actions = customer_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': group.unmarkable_ids|json_encode}}}) %}
+            {% endif %}
+            {% if query.customers|length != 1 %}
+                {% set customer_actions = customer_actions|merge({'filter': {url: path('abrechnung_index', filter_params|merge({customers: [customer.id], performSearch: 1})), title: 'abrechnung.only_customer', translation_domain: 'messages'}}) %}
+            {% endif %}
+
+            {% set select_all %}
+                {%- if group.selectable_ids is not empty -%}
+                    <input type="checkbox" class="form-check-input m-0 align-middle abrechnung-select-group" data-ids="{{ group.selectable_ids|json_encode }}" aria-label="{{ 'abrechnung.select_group'|trans({'%name%': customer.name}) }}" title="{{ 'abrechnung.select_group'|trans({'%name%': customer.name}) }}">
+                {%- endif -%}
+            {% endset %}
+
+            {% set columns = {
+                'select': {class: 'alwaysVisible multiCheckbox w-min', orderBy: false, title: false, html_after: select_all},
+                'date': {class: 'alwaysVisible w-min', orderBy: false, title: 'abrechnung.date'},
+                'description': {class: 'alwaysVisible', orderBy: false, title: 'abrechnung.description'},
+                'activity': {class: 'd-none d-md-table-cell', orderBy: false, title: 'abrechnung.activity'},
+                'user': {class: 'd-none d-md-table-cell', orderBy: false, title: 'abrechnung.user'},
+                'duration': {class: 'alwaysVisible text-end w-min', orderBy: false, title: 'abrechnung.duration'},
+            } %}
+            {% if can_view_rate %}
+                {% set columns = columns|merge({'rate': {class: 'd-none d-sm-table-cell text-end w-min', orderBy: false, title: 'abrechnung.amount'}}) %}
+            {% endif %}
+            {% if show_status %}
+                {% set columns = columns|merge({'status': {class: 'w-min', orderBy: false, title: 'abrechnung.state'}}) %}
+            {% endif %}
+            {% set columns = columns|merge({'actions': {class: 'actions alwaysVisible', orderBy: false}}) %}
+
+            <div class="card mb-3 abrechnung-customer" data-customer="{{ customer.id }}">
+                {{ kit.group_header(
+                    customer.name,
+                    customer.color|colorize(customer.name),
+                    show_group_amount ? [group.duration|duration, group.amount|money(currency)] : [group.duration|duration],
+                    customer_actions
+                ) }}
+                {{ tables.datatable_header('abrechnung', columns, null, {boxClass: 'kpu-table-wrap', columnConfig: false, sticky: false, reload: 'kimai.timesheetUpdate kimai.timesheetDelete'}) }}
+                    {% for pid, proj in group.projects %}
+                        {% set project = proj.project %}
+                        {% set project_actions = {} %}
+                        {% if proj.selectable_ids is not empty %}
+                            {% set project_actions = project_actions|merge({'select': {url: '#', title: 'abrechnung.select', translation_domain: 'messages', attr: {'data-abrechnung-action': 'select', 'data-ids': proj.selectable_ids|json_encode}}}) %}
+                        {% endif %}
+                        {% if proj.markable_ids is not empty %}
+                            {% set project_actions = project_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': proj.markable_ids|json_encode}}}) %}
+                        {% endif %}
+                        {% if proj.unmarkable_ids is not empty %}
+                            {% set project_actions = project_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': proj.unmarkable_ids|json_encode}}}) %}
+                        {% endif %}
+                        {{ kit.group_header(
+                            project.name,
+                            project.color|colorize(project.name),
+                            (can_view_rate and not proj.rate_hidden) ? [proj.duration|duration, proj.amount|money(currency)] : [proj.duration|duration],
+                            project_actions,
+                            {as_row: true, colspan: columns|length, level: 2}
+                        ) }}
+                        {% for item in proj.items %}
+                            {% set row = rows[item.id] %}
+                            {% set row_actions = {} %}
+                            {% if row.can_mark %}
+                                {% set row_actions = row_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': [item.id]|json_encode}}}) %}
+                            {% endif %}
+                            {% if row.can_unmark %}
+                                {% set row_actions = row_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': [item.id]|json_encode}}}) %}
+                            {% endif %}
+                            {% if row.can_edit %}
+                                {% set row_actions = row_actions|merge({'edit': {url: path(is_granted('view_other_timesheet') ? 'admin_timesheet_edit' : 'timesheet_edit', {id: item.id}), class: 'modal-ajax-form', title: 'edit', translation_domain: 'messages'}}) %}
+                            {% endif %}
+                            <tr class="abrechnung-row" data-id="{{ item.id }}">
+                                <td class="{{ datatable_column_class('abrechnung', 'select') }}">
+                                    {%- if row.can_mark or row.can_unmark %}{{ kit.bulk_checkbox(bulk_form, item.id) }}{% endif -%}
+                                </td>
+                                <td class="{{ datatable_column_class('abrechnung', 'date') }}">{{ item.begin|date_short }}</td>
+                                <td class="{{ datatable_column_class('abrechnung', 'description') }}">
+                                    {%- if item.description is not empty %}{{ item.description }}{% else %}<span class="text-body-secondary">{{ item.activity.name }}</span>{% endif -%}
+                                </td>
+                                <td class="{{ datatable_column_class('abrechnung', 'activity') }}">{{ item.activity.name }}</td>
+                                <td class="{{ datatable_column_class('abrechnung', 'user') }}">{{ item.user.displayName }}</td>
+                                <td class="{{ datatable_column_class('abrechnung', 'duration') }}">{{ item.duration|duration }}</td>
+                                {% if can_view_rate %}
+                                    <td class="{{ datatable_column_class('abrechnung', 'rate') }}">{% if row.rate_visible %}{{ item.rate|money(currency) }}{% else %}&ndash;{% endif %}</td>
+                                {% endif %}
+                                {% if show_status %}
+                                    <td class="{{ datatable_column_class('abrechnung', 'status') }}">{{ kit.status_badge(item.exported ? 'billed' : 'open') }}</td>
+                                {% endif %}
+                                <td class="{{ datatable_column_class('abrechnung', 'actions') }}">{{ widgets.table_actions(row_actions) }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {{ tables.data_table_footer(null, null, null) }}
+            </div>
+        {% endfor %}
+
+        {% set bulk_actions = [] %}
+        {% if markable_ids is not empty %}
+            {% set bulk_actions = bulk_actions|merge([{label: 'abrechnung.mark'|trans, url: path('abrechnung_mark', filter_params|merge({action: 'mark'})), token: csrf_token(csrf_token_id), icon: 'success', ajax: true}]) %}
+        {% endif %}
+        {% if unmarkable_ids is not empty %}
+            {% set bulk_actions = bulk_actions|merge([{label: 'abrechnung.unmark'|trans, url: path('abrechnung_mark', filter_params|merge({action: 'unmark'})), token: csrf_token(csrf_token_id), icon: 'repeat', class: markable_ids is empty ? 'btn-primary' : '', ajax: true}]) %}
+        {% endif %}
+        {% if bulk_actions is not empty %}
+            {{ kit.bulk_bar(bulk_form, bulk_actions) }}
+        {% endif %}
+    {% endif %}
     </div>
-    {% endfor %}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
+    {% include '@Abrechnung/_kit/assets.html.twig' with {kpu_part: 'js'} %}
     <script>
-    document.addEventListener('kimai.initialized', function(event) {
+    document.addEventListener('kimai.initialized', function (event) {
         var kimai = event.detail.kimai;
-        var undoLabel = '{{ 'abrechnung.undo'|trans|e('js') }}';
-        var markLabel = '{{ 'abrechnung.mark_entry'|trans|e('js') }}';
-        var errorTitle = '{{ 'abrechnung.error_title'|trans|e('js') }}';
-        var errorRequest = '{{ 'abrechnung.error_request'|trans|e('js') }}';
-        var errorSkipped = '{{ 'abrechnung.error_skipped'|trans|e('js') }}';
-        var errorFailed = '{{ 'abrechnung.error_failed'|trans|e('js') }}';
-        var markUrl = '{{ path("abrechnung_mark")|e('js') }}';
-        var csrfToken = '{{ csrf_token(csrf_token_id)|e('js') }}';
+        var FORM = '{{ bulk_form|e('js') }}';
 
-        function isMarked(id) {
-            var row = document.getElementById('row-' + id);
-            return row !== null && row.classList.contains('text-decoration-line-through');
+        function root() {
+            return document.getElementById('abrechnung-page');
         }
 
-        function applyRowState(id, exported) {
-            var row = document.getElementById('row-' + id);
-            if (!row) return;
-            var btn = row.querySelector('.abrechnung-single-toggle');
-            if (exported) {
-                row.classList.add('text-decoration-line-through', 'text-muted');
-                if (btn) { btn.classList.remove('btn-outline-success'); btn.classList.add('btn-outline-warning'); btn.textContent = undoLabel; }
-            } else {
-                row.classList.remove('text-decoration-line-through', 'text-muted');
-                if (btn) { btn.classList.remove('btn-outline-warning'); btn.classList.add('btn-outline-success'); btn.textContent = markLabel; }
+        function readIds(element, attribute) {
+            try {
+                return JSON.parse(element.getAttribute(attribute || 'data-ids') || '[]').map(String);
+            } catch (e) {
+                return [];
             }
         }
 
-        function refreshBulkButtons() {
-            document.querySelectorAll('.abrechnung-bulk-toggle').forEach(function(btn) {
-                var ids = JSON.parse(btn.dataset.ids);
-                var allExported = ids.length > 0 && ids.every(isMarked);
-                btn.dataset.marked = allExported ? '1' : '0';
-                btn.classList.remove('btn-success', 'btn-outline-success', 'btn-outline-warning');
-                if (allExported) {
-                    btn.classList.add('btn-outline-warning');
-                    btn.textContent = undoLabel;
+        function boxes() {
+            return Array.prototype.slice.call(document.querySelectorAll('input.kpu-select[data-kpu-form="' + FORM + '"]'));
+        }
+
+        function syncGroups() {
+            var all = boxes();
+            document.querySelectorAll('input.abrechnung-select-group').forEach(function (group) {
+                var wanted = readIds(group);
+                var mine = all.filter(function (box) { return wanted.indexOf(box.value) !== -1; });
+                var checked = mine.filter(function (box) { return box.checked; }).length;
+                group.checked = checked > 0 && checked === mine.length;
+                group.indeterminate = checked > 0 && checked < mine.length;
+            });
+        }
+
+        function select(ids, checked) {
+            boxes().forEach(function (box) {
+                if (ids.indexOf(box.value) !== -1) {
+                    box.checked = checked;
+                }
+            });
+            window.KimaiPluginUi.update();
+            syncGroups();
+        }
+
+        // Reversible: run immediately, reload, then show "Rückgängig" (kit toast)
+        function run(action, ids) {
+            var page = root();
+            if (page === null || ids.length === 0) {
+                return;
+            }
+            var url = action === 'unmark' ? page.dataset.unmarkUrl : page.dataset.markUrl;
+            window.KimaiPluginUi.post(url, page.dataset.token, ids).then(function (data) {
+                window.KimaiPluginUi.reloadWithToast(data.message || '', data.undo || null);
+            }).catch(function (error) {
+                kimai.getPlugin('alert').error(page.dataset.errorTitle, error && error.kpuMessage ? error.kpuMessage : null);
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest ? e.target.closest('[data-abrechnung-action]') : null;
+            if (link !== null) {
+                e.preventDefault();
+                var action = link.getAttribute('data-abrechnung-action');
+                if (action === 'select') {
+                    select(readIds(link), true);
                 } else {
-                    btn.classList.add(btn.dataset.originalClass);
-                    btn.textContent = btn.dataset.originalLabel;
+                    run(action, readIds(link));
                 }
-            });
-        }
-
-        function showError(message) {
-            kimai.getPlugin('alert').error(errorTitle, message);
-        }
-
-        function sendState(ids, action, button) {
-            var fd = new FormData();
-            ids.forEach(function(id) { fd.append('timesheets[]', id); });
-            fd.append('action', action);
-            fd.append('_token', csrfToken);
-            button.disabled = true;
-            fetch(markUrl, {
-                method: 'POST', body: fd, credentials: 'same-origin',
-                headers: {'X-Requested-With': 'XMLHttpRequest'}
-            }).then(function(r) {
-                if (!r.ok) { throw new Error('HTTP ' + r.status); }
-                return r.json();
-            }).then(function(data) {
-                Object.keys(data.states || {}).forEach(function(k) {
-                    applyRowState(parseInt(k, 10), data.states[k]);
-                });
-                refreshBulkButtons();
-                var messages = [];
-                if (data.skipped && data.skipped.length > 0) {
-                    messages.push(errorSkipped.replace('%ids%', data.skipped.join(', ')));
-                }
-                if (data.failed && data.failed.length > 0) {
-                    messages.push(errorFailed.replace('%ids%', data.failed.join(', ')));
-                }
-                if (messages.length > 0) {
-                    showError(messages);
-                }
-            }).catch(function() {
-                showError(errorRequest);
-            }).finally(function() {
-                button.disabled = false;
-            });
-        }
-
-        document.querySelectorAll('.abrechnung-single-toggle').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var id = parseInt(this.dataset.id, 10);
-                sendState([id], isMarked(id) ? 'unmark' : 'mark', this);
-            });
+                return;
+            }
+            if (e.target.closest && e.target.closest('.kpu-bulk-clear') !== null) {
+                window.setTimeout(syncGroups, 0);
+                return;
+            }
+            var markAll = e.target.closest ? e.target.closest('.abrechnung-mark-all') : null;
+            if (markAll !== null && root() !== null) {
+                e.preventDefault();
+                run('mark', readIds(root(), 'data-markable'));
+            }
         });
 
-        document.querySelectorAll('.abrechnung-bulk-toggle').forEach(function(btn) {
-            btn.dataset.originalLabel = btn.textContent.trim();
-            btn.dataset.originalClass = btn.classList.contains('btn-success') ? 'btn-success' : 'btn-outline-success';
-            btn.dataset.marked = '0';
-            btn.addEventListener('click', function() {
-                var ids = JSON.parse(this.dataset.ids);
-                // all marked -> undo all; otherwise mark the rest (already marked ones stay marked)
-                sendState(ids, this.dataset.marked === '1' ? 'unmark' : 'mark', this);
-            });
+        document.addEventListener('change', function (e) {
+            var target = e.target;
+            if (!target || !target.classList) {
+                return;
+            }
+            if (target.classList.contains('abrechnung-select-group')) {
+                select(readIds(target), target.checked);
+            } else if (target.classList.contains('kpu-select')) {
+                syncGroups();
+            }
         });
+
+        document.addEventListener('kimai.reloadedContent', syncGroups);
+        syncGroups();
     });
     </script>
 {% endblock %}

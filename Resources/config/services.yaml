@@ -10,6 +10,7 @@ services:
             - '../../Resources/'
             - '../../DependencyInjection/'
             - '../../Controller/'
+            - '../../Repository/Query/'
 
     KimaiPlugin\AbrechnungBundle\Controller\:
         resource: '../../Controller'
