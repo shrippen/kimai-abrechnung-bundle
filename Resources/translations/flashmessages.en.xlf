@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundleFlash">
+  <file source-language="en" target-language="en" datatype="plaintext" original="AbrechnungBundleFlash">
     <body>
       <trans-unit id="f000" resname="abrechnung.no_selection">
         <source>abrechnung.no_selection</source>
-        <target>Keine Einträge ausgewählt. Mindestens einen Eintrag auswählen.</target>
+        <target>No entries selected. Select at least one entry.</target>
       </trans-unit>
       <trans-unit id="f001" resname="abrechnung.invalid_action">
         <source>abrechnung.invalid_action</source>
-        <target>Ungültige Aktion. Seite neu laden und erneut versuchen.</target>
+        <target>Invalid action. Reload the page and try again.</target>
       </trans-unit>
       <trans-unit id="f002" resname="abrechnung.undo.expired">
         <source>abrechnung.undo.expired</source>
-        <target>Rückgängig ist nicht mehr möglich (nur 15 Minuten lang in derselben Sitzung). Einträge über den Filter „Abgerechnet“ zurücknehmen, sofern die Berechtigung dafür besteht.</target>
+        <target>Undo is no longer possible (only for 15 minutes in the same session). Reopen the entries via the filter "Billed", if you have the permission.</target>
       </trans-unit>
       <trans-unit id="f003" resname="abrechnung.undo.not_allowed">
         <source>abrechnung.undo.not_allowed</source>
-        <target>Rückgängig ist nur für die eigene Aktion möglich. Seite neu laden.</target>
+        <target>Undo is only possible for your own action. Reload the page.</target>
       </trans-unit>
     </body>
   </file>

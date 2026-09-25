@@ -2,115 +2,78 @@
 
 namespace KimaiPlugin\AbrechnungBundle\Repository;
 
-use App\Entity\Customer;
 use App\Entity\Timesheet;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\Query\TimesheetQuery;
+use App\Repository\TimesheetRepository;
+use KimaiPlugin\AbrechnungBundle\Repository\Query\AbrechnungQuery;
 
 /**
- * @extends ServiceEntityRepository<Timesheet>
+ * Loads billable, stopped timesheets (open = not exported, billed = exported) through Kimai's own
+ * TimesheetRepository, so team permissions are applied exactly like on the timesheet and export pages.
  */
-class OpenItemsRepository extends ServiceEntityRepository
+class OpenItemsRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Timesheet::class);
+    public function __construct(
+        private readonly TimesheetRepository $timesheetRepository,
+    ) {
     }
 
     /**
-     * Find all billable, unexported, completed timesheets.
-     *
      * @return Timesheet[]
      */
-    public function findOpenItems(
-        ?User $user = null,
-        ?Customer $customer = null,
-        ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null,
+    public function findItems(
+        User $currentUser,
+        AbrechnungQuery $filter,
+        ?\DateTimeInterface $dateFrom = null,
+        ?\DateTimeInterface $dateTo = null,
     ): array {
-        $qb = $this->createQueryBuilder('t')
-            ->leftJoin('t.project', 'p')
-            ->leftJoin('p.customer', 'c')
-            ->leftJoin('t.activity', 'a')
-            ->leftJoin('t.user', 'u')
-            ->where('t.billable = :billable')
-            ->andWhere('t.exported = :exported')
-            ->andWhere('t.end IS NOT NULL')
-            ->setParameter('billable', true)
-            ->setParameter('exported', false)
-            ->orderBy('c.name', 'ASC')
-            ->addOrderBy('t.begin', 'ASC');
+        $query = new TimesheetQuery(false);
+        $query->setCurrentUser($currentUser);
+        $query->setBillable(true);
+        $query->setState(TimesheetQuery::STATE_STOPPED);
+        $query->setExported(match ($filter->getState()) {
+            AbrechnungQuery::STATE_BILLED => TimesheetQuery::STATE_EXPORTED,
+            AbrechnungQuery::STATE_ALL => TimesheetQuery::STATE_ALL,
+            default => TimesheetQuery::STATE_NOT_EXPORTED,
+        });
 
-        if ($customer !== null) {
-            $qb->andWhere('c.id = :customerId')
-               ->setParameter('customerId', $customer->getId());
+        $orderBy = $filter->getOrderBy();
+        if ($orderBy === 'user') {
+            // TimesheetQuery has no user order; the page sorts by user within each project instead
+            $orderBy = 'begin';
+        }
+        $query->setOrderBy(\in_array($orderBy, TimesheetQuery::TIMESHEET_ORDER_ALLOWED, true) ? $orderBy : 'begin');
+        $query->setOrder($filter->getOrder());
+
+        if ($filter->hasSearchTerm()) {
+            $query->setSearchTerm($filter->getSearchTerm());
         }
 
-        if ($user !== null) {
-            $qb->andWhere('u.id = :userId')
-               ->setParameter('userId', $user->getId());
+        foreach ($filter->getUsers() as $user) {
+            $query->addUser($user);
+        }
+
+        foreach ($filter->getCustomers() as $customer) {
+            $query->addCustomer($customer);
         }
 
         if ($dateFrom !== null) {
-            $qb->andWhere('t.begin >= :dateFrom')
-               ->setParameter('dateFrom', $dateFrom);
+            $query->setBegin($dateFrom);
         }
 
         if ($dateTo !== null) {
-            $qb->andWhere('t.begin <= :dateTo')
-               ->setParameter('dateTo', $dateTo);
+            $query->setEnd($dateTo);
         }
 
-        return $qb->getQuery()->getResult();
-    }
+        // Kimai batch-loads project, customer, activity and user of all rows (no N+1)
+        $items = $this->timesheetRepository->getTimesheetsForQuery($query);
 
-    /**
-     * Group open items by customer.
-     *
-     * @return array<int, array{customer: Customer, items: Timesheet[], totalDuration: int, totalRate: float}>
-     */
-    public function findGroupedByCustomer(
-        ?User $user = null,
-        ?Customer $customer = null,
-        ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null,
-    ): array {
-        $items = $this->findOpenItems($user, $customer, $dateFrom, $dateTo);
-
-        $groups = [];
-        foreach ($items as $item) {
-            $customer = $item->getProject()->getCustomer();
-            $customerId = $customer->getId();
-            if (!isset($groups[$customerId])) {
-                $groups[$customerId] = [
-                    'customer' => $customer,
-                    'items' => [],
-                    'totalDuration' => 0,
-                    'totalRate' => 0.0,
-                ];
-            }
-            $groups[$customerId]['items'][] = $item;
-            $groups[$customerId]['totalDuration'] += $item->getDuration();
-            $groups[$customerId]['totalRate'] += $item->getRate() ?? 0.0;
+        if ($filter->getOrderBy() === 'user') {
+            $direction = $filter->getOrder() === AbrechnungQuery::ORDER_DESC ? -1 : 1;
+            usort($items, fn (Timesheet $a, Timesheet $b) => $direction * (strcasecmp((string) $a->getUser()?->getDisplayName(), (string) $b->getUser()?->getDisplayName()) ?: ($a->getBegin() <=> $b->getBegin())));
         }
 
-        return $groups;
-    }
-
-    /**
-     * Count open billable items.
-     */
-    public function countOpenItems(): int
-    {
-        $qb = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
-            ->where('t.billable = :billable')
-            ->andWhere('t.exported = :exported')
-            ->andWhere('t.end IS NOT NULL')
-            ->setParameter('billable', true)
-            ->setParameter('exported', false);
-
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        return $items;
     }
 }
