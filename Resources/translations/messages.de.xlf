@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="a030" resname="abrechnung.kpi.duration_hint">
         <source>abrechnung.kpi.duration_hint</source>
-        <target>{1}in 1 Eintrag|]1,Inf[in %count% Einträgen</target>
+        <target>{1}in 1 Eintrag|[0,Inf[in %count% Einträgen</target>
       </trans-unit>
       <trans-unit id="a031" resname="abrechnung.empty_open">
         <source>abrechnung.empty_open</source>
@@ -152,11 +152,11 @@
       </trans-unit>
       <trans-unit id="a037" resname="abrechnung.result.marked">
         <source>abrechnung.result.marked</source>
-        <target>{1}1 Eintrag abgerechnet|]1,Inf[%count% Einträge abgerechnet</target>
+        <target>{1}1 Eintrag abgerechnet|[0,Inf[%count% Einträge abgerechnet</target>
       </trans-unit>
       <trans-unit id="a038" resname="abrechnung.result.unmarked">
         <source>abrechnung.result.unmarked</source>
-        <target>{1}1 Eintrag wieder offen|]1,Inf[%count% Einträge wieder offen</target>
+        <target>{1}1 Eintrag wieder offen|[0,Inf[%count% Einträge wieder offen</target>
       </trans-unit>
       <trans-unit id="a039" resname="abrechnung.result.unchanged">
         <source>abrechnung.result.unchanged</source>
@@ -164,11 +164,11 @@
       </trans-unit>
       <trans-unit id="a040" resname="abrechnung.result.skipped">
         <source>abrechnung.result.skipped</source>
-        <target>{1}1 Eintrag übersprungen: keine Berechtigung|]1,Inf[%count% Einträge übersprungen: keine Berechtigung</target>
+        <target>{1}1 Eintrag übersprungen: keine Berechtigung|[0,Inf[%count% Einträge übersprungen: keine Berechtigung</target>
       </trans-unit>
       <trans-unit id="a041" resname="abrechnung.result.failed">
         <source>abrechnung.result.failed</source>
-        <target>{1}1 Eintrag nicht gespeichert, Seite neu laden und erneut versuchen|]1,Inf[%count% Einträge nicht gespeichert, Seite neu laden und erneut versuchen</target>
+        <target>{1}1 Eintrag nicht gespeichert, Seite neu laden und erneut versuchen|[0,Inf[%count% Einträge nicht gespeichert, Seite neu laden und erneut versuchen</target>
       </trans-unit>
       <trans-unit id="a100" resname="abrechnung.all_customers">
         <source>abrechnung.all_customers</source>

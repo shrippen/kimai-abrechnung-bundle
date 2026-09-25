@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="a030" resname="abrechnung.kpi.duration_hint">
         <source>abrechnung.kpi.duration_hint</source>
-        <target>{1}in 1 entry|]1,Inf[in %count% entries</target>
+        <target>{1}in 1 entry|[0,Inf[in %count% entries</target>
       </trans-unit>
       <trans-unit id="a031" resname="abrechnung.empty_open">
         <source>abrechnung.empty_open</source>
@@ -152,11 +152,11 @@
       </trans-unit>
       <trans-unit id="a037" resname="abrechnung.result.marked">
         <source>abrechnung.result.marked</source>
-        <target>{1}1 entry marked as billed|]1,Inf[%count% entries marked as billed</target>
+        <target>{1}1 entry marked as billed|[0,Inf[%count% entries marked as billed</target>
       </trans-unit>
       <trans-unit id="a038" resname="abrechnung.result.unmarked">
         <source>abrechnung.result.unmarked</source>
-        <target>{1}1 entry reopened|]1,Inf[%count% entries reopened</target>
+        <target>{1}1 entry reopened|[0,Inf[%count% entries reopened</target>
       </trans-unit>
       <trans-unit id="a039" resname="abrechnung.result.unchanged">
         <source>abrechnung.result.unchanged</source>
@@ -164,11 +164,11 @@
       </trans-unit>
       <trans-unit id="a040" resname="abrechnung.result.skipped">
         <source>abrechnung.result.skipped</source>
-        <target>{1}1 entry skipped: no permission|]1,Inf[%count% entries skipped: no permission</target>
+        <target>{1}1 entry skipped: no permission|[0,Inf[%count% entries skipped: no permission</target>
       </trans-unit>
       <trans-unit id="a041" resname="abrechnung.result.failed">
         <source>abrechnung.result.failed</source>
-        <target>{1}1 entry not saved, reload the page and try again|]1,Inf[%count% entries not saved, reload the page and try again</target>
+        <target>{1}1 entry not saved, reload the page and try again|[0,Inf[%count% entries not saved, reload the page and try again</target>
       </trans-unit>
       <trans-unit id="a100" resname="abrechnung.all_customers">
         <source>abrechnung.all_customers</source>

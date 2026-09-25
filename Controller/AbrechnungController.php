@@ -55,7 +55,8 @@ class AbrechnungController extends AbstractController
 
         $currentUser = $this->getUser();
         $factory = $this->getDateTimeFactory();
-        $formatter = new LocaleFormatter($this->localeService, $request->getLocale());
+        // same format locale as Kimai's Twig filters (user preference, set per request by Kimai)
+        $formatter = new LocaleFormatter($this->localeService, \Locale::getDefault());
 
         $query = new AbrechnungQuery();
         $query->setCurrentUser($currentUser);

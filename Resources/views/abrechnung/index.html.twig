@@ -5,7 +5,7 @@
 
 {% set state = query.state %}
 {% set bulk_form = 'abrechnung-bulk' %}
-{% set rate_shown = can_view_rate and not totals.rate_hidden %}
+{% set rate_shown = can_view_rate and not totals.rate_hidden and totals.count > 0 %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -40,7 +40,7 @@
     {% set tiles = [{
         label: ('abrechnung.kpi.duration_' ~ state)|trans,
         value: totals.duration|duration,
-        hint: 'abrechnung.kpi.duration_hint'|trans({'%count%': totals.count}),
+        hint: totals.count > 0 ? 'abrechnung.kpi.duration_hint'|trans({'%count%': totals.count}) : null,
         highlight: not rate_shown,
     }] %}
     {% if rate_shown %}
@@ -50,7 +50,7 @@
         {% endfor %}
         {% set tiles = tiles|merge([{
             label: ('abrechnung.kpi.amount_' ~ state)|trans,
-            value: amounts is empty ? 0|money : amounts|join(' · '),
+            value: amounts|join(' · '),
             highlight: true,
         }]) %}
     {% endif %}
@@ -98,10 +98,11 @@
                 {%- endif -%}
             {% endset %}
 
+            {# 390 px: with the status column the description is hidden (select, date, duration, status, …) #}
             {% set columns = {
                 'select': {class: 'alwaysVisible multiCheckbox w-min', orderBy: false, title: false, html_after: select_all},
                 'date': {class: 'alwaysVisible w-min', orderBy: false, title: 'abrechnung.date'},
-                'description': {class: 'alwaysVisible', orderBy: false, title: 'abrechnung.description'},
+                'description': {class: show_status ? 'd-none d-sm-table-cell' : 'alwaysVisible', orderBy: false, title: 'abrechnung.description'},
                 'activity': {class: 'd-none d-md-table-cell', orderBy: false, title: 'abrechnung.activity'},
                 'user': {class: 'd-none d-md-table-cell', orderBy: false, title: 'abrechnung.user'},
                 'duration': {class: 'alwaysVisible text-end w-min', orderBy: false, title: 'abrechnung.duration'},
