@@ -7,7 +7,7 @@ Ein Kimai Plugin für die Abrechnungsübersicht. Zeigt alle abrechenbaren, noch 
 - Übersicht aller offenen (abrechenbar + unexportiert + beendet) Zeiteinträge
 - Gruppierung nach **Kunde → Projekt → Einträge**
 - Filter: Monat, Jahr, Kunde, Mitarbeiter
-- **AJAX-Toggle**: Eintrag/Projekt/Kunde/Alle abrechnen ohne Seitenreload
+- **AJAX**: Eintrag/Projekt/Kunde/Alle abrechnen ohne Seitenreload
 - Einträge werden visuell durchgestrichen, mit "Rückgängig"-Option
 - Farbcircles für Kunden und Projekte (nutzt Kimai-eigenes Styling)
 - Sidebar-Menüpunkt unter "Rechnungen"
@@ -41,13 +41,17 @@ Das Plugin verwendet bestehende Kimai-Berechtigungen:
 |--------|-------------|
 | Seite anzeigen | `view_invoice` |
 | Einträge abrechnen/abwählen | `edit_export_own_timesheet` / `edit_export_other_timesheet` |
-| Bereits exportierte Einträge abwählen | `edit_exported_timesheet` |
+| Abgerechnete (= exportierte) Einträge wieder abwählen | zusätzlich `edit_exported_timesheet` |
+| Beträge sehen | `view_rate_own_timesheet` / `view_rate_other_timesheet` |
+
+Sichtbar sind – wie auf Kimais Zeiterfassungs-Seiten – nur die eigenen Einträge und die der Teams, die man leitet (Admins sehen alle). Die Kunden- und Mitarbeiter-Filter enthalten ebenfalls nur sichtbare Kunden bzw. aktive Mitarbeiter.
 
 ## Technik
 
 - **Keine eigene Datenbank** – nutzt das bestehende `exported`-Flag der Timesheet-Entität
-- **AJAX-Endpunkte**: POST `/de/abrechnung/mark` mit `X-Requested-With: XMLHttpRequest`
-- **Persistenz**: `TimesheetService::saveTimesheet()` – gleicher Code-Pfad wie Kimais Export-Button
+- **Abfrage**: `TimesheetRepository::getTimesheetsForQuery()` mit `TimesheetQuery` (inkl. Team-Berechtigungen, wie Kimais eigene Listen)
+- **AJAX-Endpunkt**: POST `/de/abrechnung/mark` mit `X-Requested-With: XMLHttpRequest`, Parametern `timesheets[]`, `action=mark|unmark` und CSRF-Token `_token` (ID `abrechnung.mark`). Der Endpunkt setzt den Status (kein Toggle) und ist damit idempotent; Antwort: `{success, states: {id: bool}, skipped: [id], failed: [id]}`
+- **Persistenz**: `TimesheetService::saveTimesheet()` pro Eintrag – gleicher Code-Pfad wie Kimais API-Endpunkt `PATCH /api/timesheets/{id}/export` (inkl. Timesheet-Events). Kimais Export-Button nutzt dagegen `TimesheetRepository::setExported()` (DQL-Bulk-Update ohne Events, kann nur markieren)
 - **Rollback**: Plugin-Ordner löschen + Container-Neustart, keine DB-Migrationen nötig
 
 ## Lizenz
