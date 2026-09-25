@@ -70,10 +70,6 @@
         <source>abrechnung.unmark</source>
         <target>Reopen</target>
       </trans-unit>
-      <trans-unit id="a017" resname="abrechnung.select">
-        <source>abrechnung.select</source>
-        <target>Select</target>
-      </trans-unit>
       <trans-unit id="a018" resname="abrechnung.select_group">
         <source>abrechnung.select_group</source>
         <target>Select all entries of %name%</target>
@@ -169,6 +165,10 @@
       <trans-unit id="a041" resname="abrechnung.result.failed">
         <source>abrechnung.result.failed</source>
         <target>{1}1 entry not saved, reload the page and try again|[0,Inf[%count% entries not saved, reload the page and try again</target>
+      </trans-unit>
+      <trans-unit id="a042" resname="abrechnung.result.conflict">
+        <source>abrechnung.result.conflict</source>
+        <target>{1}1 entry not reverted: changed in the meantime|[0,Inf[%count% entries not reverted: changed in the meantime</target>
       </trans-unit>
       <trans-unit id="a100" resname="abrechnung.all_customers">
         <source>abrechnung.all_customers</source>

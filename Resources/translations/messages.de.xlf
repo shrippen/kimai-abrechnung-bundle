@@ -70,10 +70,6 @@
         <source>abrechnung.unmark</source>
         <target>Zurücknehmen</target>
       </trans-unit>
-      <trans-unit id="a017" resname="abrechnung.select">
-        <source>abrechnung.select</source>
-        <target>Auswählen</target>
-      </trans-unit>
       <trans-unit id="a018" resname="abrechnung.select_group">
         <source>abrechnung.select_group</source>
         <target>Alle Einträge von %name% auswählen</target>
@@ -169,6 +165,10 @@
       <trans-unit id="a041" resname="abrechnung.result.failed">
         <source>abrechnung.result.failed</source>
         <target>{1}1 Eintrag nicht gespeichert, Seite neu laden und erneut versuchen|[0,Inf[%count% Einträge nicht gespeichert, Seite neu laden und erneut versuchen</target>
+      </trans-unit>
+      <trans-unit id="a042" resname="abrechnung.result.conflict">
+        <source>abrechnung.result.conflict</source>
+        <target>{1}1 Eintrag nicht zurückgesetzt: seitdem geändert|[0,Inf[%count% Einträge nicht zurückgesetzt: seitdem geändert</target>
       </trans-unit>
       <trans-unit id="a100" resname="abrechnung.all_customers">
         <source>abrechnung.all_customers</source>

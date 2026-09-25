@@ -10,6 +10,14 @@
         <source>abrechnung.invalid_action</source>
         <target>Invalid action. Reload the page and try again.</target>
       </trans-unit>
+      <trans-unit id="f002" resname="abrechnung.undo.expired">
+        <source>abrechnung.undo.expired</source>
+        <target>Undo is no longer possible (only for 15 minutes in the same session). Reopen the entries via the filter "Billed", if you have the permission.</target>
+      </trans-unit>
+      <trans-unit id="f003" resname="abrechnung.undo.not_allowed">
+        <source>abrechnung.undo.not_allowed</source>
+        <target>Undo is only possible for your own action. Reload the page.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

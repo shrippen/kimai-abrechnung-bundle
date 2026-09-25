@@ -6,6 +6,10 @@
 {% set state = query.state %}
 {% set bulk_form = 'abrechnung-bulk' %}
 {% set rate_shown = can_view_rate and not totals.rate_hidden and totals.count > 0 %}
+{# immediate actions in the "…" menus: kit.js posts ids[] + _token, JSON {message, undo} -> reload + undo toast #}
+{% set mark_url = path('abrechnung_mark', {action: 'mark'}) %}
+{% set unmark_url = path('abrechnung_mark', {action: 'unmark'}) %}
+{% set mark_token = csrf_token(csrf_token_id) %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -59,13 +63,6 @@
         {label: 'abrechnung.kpi.customers'|trans, value: totals.customers|amount},
     ]) %}
 
-    <div id="abrechnung-page"
-         data-mark-url="{{ path('abrechnung_mark', {action: 'mark'}) }}"
-         data-unmark-url="{{ path('abrechnung_mark', {action: 'unmark'}) }}"
-         data-token="{{ csrf_token(csrf_token_id) }}"
-         data-markable="{{ markable_ids|json_encode }}"
-         data-error-title="{{ 'kpu.toast.error'|trans({}, 'kpu') }}">
-
     {{ kit.kpi_bar(tiles) }}
 
     {% if groups is empty %}
@@ -83,20 +80,18 @@
 
             {% set customer_actions = {} %}
             {% if group.markable_ids is not empty %}
-                {% set customer_actions = customer_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': group.markable_ids|json_encode}}}) %}
+                {% set customer_actions = customer_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-kpu-post': mark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': group.markable_ids|join(',')}}}) %}
             {% endif %}
             {% if group.unmarkable_ids is not empty %}
-                {% set customer_actions = customer_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': group.unmarkable_ids|json_encode}}}) %}
+                {% set customer_actions = customer_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-kpu-post': unmark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': group.unmarkable_ids|join(',')}}}) %}
             {% endif %}
             {% if query.customers|length != 1 %}
                 {% set customer_actions = customer_actions|merge({'filter': {url: path('abrechnung_index', filter_params|merge({customers: [customer.id], performSearch: 1})), title: 'abrechnung.only_customer', translation_domain: 'messages'}}) %}
             {% endif %}
 
-            {% set select_all %}
-                {%- if group.selectable_ids is not empty -%}
-                    <input type="checkbox" class="form-check-input m-0 align-middle abrechnung-select-group" data-ids="{{ group.selectable_ids|json_encode }}" aria-label="{{ 'abrechnung.select_group'|trans({'%name%': customer.name}) }}" title="{{ 'abrechnung.select_group'|trans({'%name%': customer.name}) }}">
-                {%- endif -%}
-            {% endset %}
+            {# group keys for the kit selection: customer "c<id>", project "c<id>-p<id>" (nested) #}
+            {% set customer_group = 'c' ~ customer.id %}
+            {% set select_all = group.selectable_ids is not empty ? kit.bulk_select_group(bulk_form, customer_group, 'abrechnung.select_group'|trans({'%name%': customer.name})) : '' %}
 
             {# 390 px: with the status column the description is hidden (select, date, duration, status, …) #}
             {% set columns = {
@@ -125,38 +120,36 @@
                 {{ tables.datatable_header('abrechnung', columns, null, {boxClass: 'kpu-table-wrap', columnConfig: false, sticky: false, reload: 'kimai.timesheetUpdate kimai.timesheetDelete'}) }}
                     {% for pid, proj in group.projects %}
                         {% set project = proj.project %}
+                        {% set project_group = customer_group ~ '-p' ~ project.id %}
                         {% set project_actions = {} %}
-                        {% if proj.selectable_ids is not empty %}
-                            {% set project_actions = project_actions|merge({'select': {url: '#', title: 'abrechnung.select', translation_domain: 'messages', attr: {'data-abrechnung-action': 'select', 'data-ids': proj.selectable_ids|json_encode}}}) %}
-                        {% endif %}
                         {% if proj.markable_ids is not empty %}
-                            {% set project_actions = project_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': proj.markable_ids|json_encode}}}) %}
+                            {% set project_actions = project_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-kpu-post': mark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': proj.markable_ids|join(',')}}}) %}
                         {% endif %}
                         {% if proj.unmarkable_ids is not empty %}
-                            {% set project_actions = project_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': proj.unmarkable_ids|json_encode}}}) %}
+                            {% set project_actions = project_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-kpu-post': unmark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': proj.unmarkable_ids|join(',')}}}) %}
                         {% endif %}
                         {{ kit.group_header(
                             project.name,
                             project.color|colorize(project.name),
                             (can_view_rate and not proj.rate_hidden) ? [proj.duration|duration, proj.amount|money(currency)] : [proj.duration|duration],
                             project_actions,
-                            {as_row: true, colspan: columns|length, level: 2}
+                            {as_row: true, colspan: columns|length, level: 2, select: proj.selectable_ids is not empty ? {form: bulk_form, group: project_group, label: 'abrechnung.select_group'|trans({'%name%': project.name})} : null}
                         ) }}
                         {% for item in proj.items %}
                             {% set row = rows[item.id] %}
                             {% set row_actions = {} %}
                             {% if row.can_mark %}
-                                {% set row_actions = row_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'mark', 'data-ids': [item.id]|json_encode}}}) %}
+                                {% set row_actions = row_actions|merge({'success': {url: '#', title: 'abrechnung.mark', translation_domain: 'messages', attr: {'data-kpu-post': mark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': item.id}}}) %}
                             {% endif %}
                             {% if row.can_unmark %}
-                                {% set row_actions = row_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-abrechnung-action': 'unmark', 'data-ids': [item.id]|json_encode}}}) %}
+                                {% set row_actions = row_actions|merge({'repeat': {url: '#', title: 'abrechnung.unmark', translation_domain: 'messages', attr: {'data-kpu-post': unmark_url, 'data-kpu-token': mark_token, 'data-kpu-ids': item.id}}}) %}
                             {% endif %}
                             {% if row.can_edit %}
                                 {% set row_actions = row_actions|merge({'edit': {url: path(is_granted('view_other_timesheet') ? 'admin_timesheet_edit' : 'timesheet_edit', {id: item.id}), class: 'modal-ajax-form', title: 'edit', translation_domain: 'messages'}}) %}
                             {% endif %}
                             <tr class="abrechnung-row" data-id="{{ item.id }}">
                                 <td class="{{ datatable_column_class('abrechnung', 'select') }}">
-                                    {%- if row.can_mark or row.can_unmark %}{{ kit.bulk_checkbox(bulk_form, item.id) }}{% endif -%}
+                                    {%- if row.can_mark or row.can_unmark %}{{ kit.bulk_checkbox(bulk_form, item.id, null, [customer_group, project_group]) }}{% endif -%}
                                 </td>
                                 <td class="{{ datatable_column_class('abrechnung', 'date') }}">{{ item.begin|date_short }}</td>
                                 <td class="{{ datatable_column_class('abrechnung', 'description') }}">
@@ -190,105 +183,9 @@
             {{ kit.bulk_bar(bulk_form, bulk_actions) }}
         {% endif %}
     {% endif %}
-    </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     {% include '@Abrechnung/_kit/assets.html.twig' with {kpu_part: 'js'} %}
-    <script>
-    document.addEventListener('kimai.initialized', function (event) {
-        var kimai = event.detail.kimai;
-        var FORM = '{{ bulk_form|e('js') }}';
-
-        function root() {
-            return document.getElementById('abrechnung-page');
-        }
-
-        function readIds(element, attribute) {
-            try {
-                return JSON.parse(element.getAttribute(attribute || 'data-ids') || '[]').map(String);
-            } catch (e) {
-                return [];
-            }
-        }
-
-        function boxes() {
-            return Array.prototype.slice.call(document.querySelectorAll('input.kpu-select[data-kpu-form="' + FORM + '"]'));
-        }
-
-        function syncGroups() {
-            var all = boxes();
-            document.querySelectorAll('input.abrechnung-select-group').forEach(function (group) {
-                var wanted = readIds(group);
-                var mine = all.filter(function (box) { return wanted.indexOf(box.value) !== -1; });
-                var checked = mine.filter(function (box) { return box.checked; }).length;
-                group.checked = checked > 0 && checked === mine.length;
-                group.indeterminate = checked > 0 && checked < mine.length;
-            });
-        }
-
-        function select(ids, checked) {
-            boxes().forEach(function (box) {
-                if (ids.indexOf(box.value) !== -1) {
-                    box.checked = checked;
-                }
-            });
-            window.KimaiPluginUi.update();
-            syncGroups();
-        }
-
-        // Reversible: run immediately, reload, then show "Rückgängig" (kit toast)
-        function run(action, ids) {
-            var page = root();
-            if (page === null || ids.length === 0) {
-                return;
-            }
-            var url = action === 'unmark' ? page.dataset.unmarkUrl : page.dataset.markUrl;
-            window.KimaiPluginUi.post(url, page.dataset.token, ids).then(function (data) {
-                window.KimaiPluginUi.reloadWithToast(data.message || '', data.undo || null);
-            }).catch(function (error) {
-                kimai.getPlugin('alert').error(page.dataset.errorTitle, error && error.kpuMessage ? error.kpuMessage : null);
-            });
-        }
-
-        document.addEventListener('click', function (e) {
-            var link = e.target.closest ? e.target.closest('[data-abrechnung-action]') : null;
-            if (link !== null) {
-                e.preventDefault();
-                var action = link.getAttribute('data-abrechnung-action');
-                if (action === 'select') {
-                    select(readIds(link), true);
-                } else {
-                    run(action, readIds(link));
-                }
-                return;
-            }
-            if (e.target.closest && e.target.closest('.kpu-bulk-clear') !== null) {
-                window.setTimeout(syncGroups, 0);
-                return;
-            }
-            var markAll = e.target.closest ? e.target.closest('.abrechnung-mark-all') : null;
-            if (markAll !== null && root() !== null) {
-                e.preventDefault();
-                run('mark', readIds(root(), 'data-markable'));
-            }
-        });
-
-        document.addEventListener('change', function (e) {
-            var target = e.target;
-            if (!target || !target.classList) {
-                return;
-            }
-            if (target.classList.contains('abrechnung-select-group')) {
-                select(readIds(target), target.checked);
-            } else if (target.classList.contains('kpu-select')) {
-                syncGroups();
-            }
-        });
-
-        document.addEventListener('kimai.reloadedContent', syncGroups);
-        syncGroups();
-    });
-    </script>
 {% endblock %}

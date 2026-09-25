@@ -28,11 +28,11 @@ class AbrechnungController extends AbstractController
     public const HELP_URL = 'https://github.com/shrippen/kimai-abrechnung-bundle/blob/main/docs/abrechnung.md';
 
     /**
-     * Entries marked in this session may be reopened ("Undo") for this many seconds,
-     * even without the permission edit_exported_timesheet (team leads).
+     * Undo window (kimai-plugin-ui GUIDELINES 3.5 "Rückgängig-Fenster"): an action can be undone for this many
+     * seconds by the same user in the same session, see undo().
      */
-    public const UNDO_GRACE_SECONDS = 900;
-    private const UNDO_SESSION_KEY = 'abrechnung.undo_grace';
+    public const UNDO_WINDOW_SECONDS = 900;
+    private const UNDO_SESSION_PREFIX = 'abrechnung.undo.';
 
     public function __construct(
         private readonly OpenItemsRepository $openItemsRepository,
@@ -155,7 +155,11 @@ class AbrechnungController extends AbstractController
         $table->deactivateConfiguration();
         $page->setDataTable($table);
         $page->setActionPayload([
-            'mark_all' => \count($data['markable_ids']) > 0,
+            'mark_all' => [
+                'url' => $this->generateUrl('abrechnung_mark', ['action' => 'mark']),
+                'token' => $this->csrfTokenManager->getToken(self::CSRF_TOKEN_ID)->getValue(),
+                'ids' => $data['markable_ids'],
+            ],
             'export_params' => $exportParams,
         ]);
 
@@ -231,7 +235,7 @@ class AbrechnungController extends AbstractController
         $undo = null;
         if (\count($result['changed']) > 0) {
             $undo = [
-                'url' => $this->generateUrl('abrechnung_mark', ['action' => $exported ? 'unmark' : 'mark']),
+                'url' => $this->generateUrl('abrechnung_undo', ['undo' => $this->rememberUndo($request, $result['changed'], !$exported, $result['modified'])]),
                 'token' => $this->csrfTokenManager->getToken(self::CSRF_TOKEN_ID)->getValue(),
                 'ids' => $result['changed'],
             ];
@@ -255,6 +259,156 @@ class AbrechnungController extends AbstractController
         $this->addFlash('kpu_result', $message);
 
         return $this->redirectToRoute('abrechnung_index', $redirectParams);
+    }
+
+    /**
+     * Undo of one mark/unmark action ("Rückgängig" in the toast).
+     *
+     * Implements the undo window of kimai-plugin-ui GUIDELINES 3.5 ("Rückgängig-Fenster"):
+     *  1. only the user who ran the action (user id stored with the action),
+     *  2. only in the same session: the action id in the URL names a session entry written by mark();
+     *     IDs from the request alone never suffice, they may only narrow the stored IDs,
+     *  3. at most UNDO_WINDOW_SECONDS (15 min) after the action; the entry is removed when expired and after the undo,
+     *  4. only the IDs of that action, only back to the state before, only if the entry was not changed since,
+     *  5. the approved exception (product owner, GUIDELINES 3.5 point 5): undoing one's own "Abrechnen" reopens the
+     *     entries without edit_exported_timesheet. edit_export was checked by the action and is checked again here.
+     *     After the window Kimai's normal rule applies again (mark(): unmark needs edit_exported_timesheet).
+     */
+    #[Route(path: '/undo/{undo}', name: 'abrechnung_undo', requirements: ['undo' => '[a-f0-9]{32}'], methods: ['POST'])]
+    #[IsGranted('view_invoice')]
+    public function undo(Request $request, string $undo): Response
+    {
+        $isJson = $request->isXmlHttpRequest() || \in_array('application/json', $request->getAcceptableContentTypes(), true);
+        $refuse = function (string $key, int $status) use ($isJson): Response {
+            if ($isJson) {
+                return $this->json(['success' => false, 'error' => $key, 'message' => $this->translator->trans($key, [], 'flashmessages')], $status);
+            }
+            $this->flashError($key);
+
+            return $this->redirectToRoute('abrechnung_index');
+        };
+
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, (string) $request->request->get('_token'))) {
+            return $refuse('action.csrf.error', Response::HTTP_BAD_REQUEST);
+        }
+
+        $session = $request->getSession();
+        $this->purgeExpiredUndo($request);
+        $key = self::UNDO_SESSION_PREFIX . $undo;
+        $entry = $session->get($key);
+
+        // (2) same session, (3) within the window: purgeExpiredUndo() removed older entries
+        if (!\is_array($entry) || !isset($entry['user'], $entry['ids'], $entry['before'], $entry['at'])) {
+            return $refuse('abrechnung.undo.expired', Response::HTTP_GONE);
+        }
+        // (1) same user (e.g. not after "switch user" in the same browser session)
+        if ($entry['user'] !== $this->getUser()->getId()) {
+            return $refuse('abrechnung.undo.not_allowed', Response::HTTP_FORBIDDEN);
+        }
+
+        // (4) only the IDs of this action
+        $ids = array_values(array_map('intval', $entry['ids']));
+        $requested = array_values(array_unique(array_map('intval', $request->request->all('ids'))));
+        if (\count($requested) > 0) {
+            if (\count(array_diff($requested, $ids)) > 0) {
+                return $refuse('abrechnung.undo.not_allowed', Response::HTTP_FORBIDDEN);
+            }
+            $ids = $requested;
+        }
+
+        $before = (bool) $entry['before'];
+        $modified = (array) ($entry['modified'] ?? []);
+        $changed = [];
+        $conflicts = [];
+        $failed = [];
+
+        $timesheets = [];
+        foreach ($this->timesheetRepository->findBy(['id' => $ids]) as $timesheet) {
+            $timesheets[$timesheet->getId()] = $timesheet;
+        }
+
+        foreach ($ids as $id) {
+            $timesheet = $timesheets[$id] ?? null;
+            // (5) the permission for the action itself is still required
+            if (!$timesheet instanceof Timesheet || !$this->isGranted('edit_export', $timesheet)) {
+                $conflicts[] = $id;
+                continue;
+            }
+            // (4) unchanged since the action: still in the state the action set, same modification time
+            if ($timesheet->isExported() === $before || $timesheet->getModifiedAt()?->getTimestamp() !== ($modified[$id] ?? null)) {
+                $conflicts[] = $id;
+                continue;
+            }
+            try {
+                $timesheet->setExported($before);
+                $this->timesheetService->saveTimesheet($timesheet);
+                $changed[] = $id;
+            } catch (\Exception $ex) {
+                $this->logException($ex);
+                $failed[] = $id;
+            }
+        }
+
+        // (3) one undo per action
+        $session->remove($key);
+
+        $parts = [];
+        if (\count($changed) > 0) {
+            $parts[] = $this->translator->trans($before ? 'abrechnung.result.marked' : 'abrechnung.result.unmarked', ['%count%' => \count($changed)]);
+        }
+        if (\count($conflicts) > 0) {
+            $parts[] = $this->translator->trans('abrechnung.result.conflict', ['%count%' => \count($conflicts)]);
+        }
+        if (\count($failed) > 0) {
+            $parts[] = $this->translator->trans('abrechnung.result.failed', ['%count%' => \count($failed)]);
+        }
+        $message = implode(' · ', $parts);
+
+        if ($isJson) {
+            return $this->json([
+                'success' => \count($conflicts) === 0 && \count($failed) === 0,
+                'changed' => $changed,
+                'skipped' => $conflicts,
+                'failed' => $failed,
+                'message' => $message,
+            ], \count($changed) === 0 ? Response::HTTP_CONFLICT : Response::HTTP_OK);
+        }
+
+        $this->addFlash('kpu_result', $message);
+
+        return $this->redirectToRoute('abrechnung_index');
+    }
+
+    /**
+     * Stores one action for undo() (GUIDELINES 3.5) and returns its id.
+     *
+     * @param int[] $ids
+     * @param array<int, int|null> $modified modification time (unix) of each entry right after the action
+     */
+    private function rememberUndo(Request $request, array $ids, bool $before, array $modified): string
+    {
+        $this->purgeExpiredUndo($request);
+        $id = bin2hex(random_bytes(16));
+        $request->getSession()->set(self::UNDO_SESSION_PREFIX . $id, [
+            'user' => $this->getUser()->getId(),
+            'ids' => array_values($ids),
+            'before' => $before,
+            'modified' => $modified,
+            'at' => time(),
+        ]);
+
+        return $id;
+    }
+
+    private function purgeExpiredUndo(Request $request): void
+    {
+        $session = $request->getSession();
+        $limit = time() - self::UNDO_WINDOW_SECONDS;
+        foreach ($session->all() as $name => $value) {
+            if (str_starts_with((string) $name, self::UNDO_SESSION_PREFIX) && (!\is_array($value) || !\is_int($value['at'] ?? null) || $value['at'] < $limit)) {
+                $session->remove($name);
+            }
+        }
     }
 
     /**
@@ -367,7 +521,7 @@ class AbrechnungController extends AbstractController
      * entries the user may not change are reported as skipped, errors per entry as failed.
      *
      * @param int[] $ids
-     * @return array{states: array<int, bool>, changed: int[], skipped: int[], failed: int[]}
+     * @return array{states: array<int, bool>, changed: int[], skipped: int[], failed: int[], modified: array<int, int|null>}
      */
     private function setExported(Request $request, array $ids, bool $exported): array
     {
@@ -376,12 +530,7 @@ class AbrechnungController extends AbstractController
         $skipped = [];
         $failed = [];
 
-        $session = $request->getSession();
-        $now = time();
-        $grace = array_filter(
-            (array) $session->get(self::UNDO_SESSION_KEY, []),
-            fn ($time) => \is_int($time) && $time >= $now - self::UNDO_GRACE_SECONDS
-        );
+        $modified = [];
         $canReopen = $this->isGranted('edit_exported_timesheet');
 
         $timesheets = [];
@@ -402,9 +551,8 @@ class AbrechnungController extends AbstractController
                 continue;
             }
 
-            // Same rule as Kimai's API (PATCH /api/timesheets/{id}/export), except for
-            // "Undo" of entries this session marked a few minutes ago
-            if ($timesheet->isExported() && !$canReopen && !isset($grace[$id])) {
+            // Same rule as Kimai's API (PATCH /api/timesheets/{id}/export); the only exception is undo()
+            if ($timesheet->isExported() && !$canReopen) {
                 $skipped[] = $id;
                 continue;
             }
@@ -414,20 +562,14 @@ class AbrechnungController extends AbstractController
                 $this->timesheetService->saveTimesheet($timesheet);
                 $states[$id] = $exported;
                 $changed[] = $id;
-                if ($exported) {
-                    $grace[$id] = $now;
-                } else {
-                    unset($grace[$id]);
-                }
+                $modified[$id] = $timesheet->getModifiedAt()?->getTimestamp();
             } catch (\Exception $ex) {
                 $this->logException($ex);
                 $failed[] = $id;
             }
         }
 
-        $session->set(self::UNDO_SESSION_KEY, $grace);
-
-        return ['states' => $states, 'changed' => $changed, 'skipped' => $skipped, 'failed' => $failed];
+        return ['states' => $states, 'changed' => $changed, 'skipped' => $skipped, 'failed' => $failed, 'modified' => $modified];
     }
 
     /**

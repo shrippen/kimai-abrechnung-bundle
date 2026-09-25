@@ -19,12 +19,17 @@ final class AbrechnungActionsSubscriber extends AbstractActionsSubscriber
     {
         $payload = $event->getPayload();
 
-        // Reversible: runs immediately via the bulk bar (page JS), followed by an undo toast
-        if (($payload['mark_all'] ?? false) === true) {
+        // Reversible: runs immediately (kit.js data-kpu-post), followed by an undo toast (GUIDELINES 3.5)
+        $markAll = $payload['mark_all'] ?? null;
+        if (\is_array($markAll) && \count($markAll['ids'] ?? []) > 0) {
             $event->addAction('success', [
                 'url' => '#',
-                'class' => 'abrechnung-mark-all',
                 'title' => 'abrechnung.mark_all_visible',
+                'attr' => [
+                    'data-kpu-post' => $markAll['url'],
+                    'data-kpu-token' => $markAll['token'],
+                    'data-kpu-ids' => implode(',', $markAll['ids']),
+                ],
             ]);
         }
 

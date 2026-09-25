@@ -10,6 +10,14 @@
         <source>abrechnung.invalid_action</source>
         <target>Ungültige Aktion. Seite neu laden und erneut versuchen.</target>
       </trans-unit>
+      <trans-unit id="f002" resname="abrechnung.undo.expired">
+        <source>abrechnung.undo.expired</source>
+        <target>Rückgängig ist nicht mehr möglich (nur 15 Minuten lang in derselben Sitzung). Einträge über den Filter „Abgerechnet“ zurücknehmen, sofern die Berechtigung dafür besteht.</target>
+      </trans-unit>
+      <trans-unit id="f003" resname="abrechnung.undo.not_allowed">
+        <source>abrechnung.undo.not_allowed</source>
+        <target>Rückgängig ist nur für die eigene Aktion möglich. Seite neu laden.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
