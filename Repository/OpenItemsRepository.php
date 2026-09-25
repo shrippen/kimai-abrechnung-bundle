@@ -5,112 +5,109 @@ namespace KimaiPlugin\AbrechnungBundle\Repository;
 use App\Entity\Customer;
 use App\Entity\Timesheet;
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\Query\TimesheetQuery;
+use App\Repository\TimesheetRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * @extends ServiceEntityRepository<Timesheet>
+ * Loads open (billable, not exported, stopped) timesheets through Kimai's own
+ * TimesheetRepository, so team permissions are applied exactly like on the
+ * timesheet and export pages.
  */
-class OpenItemsRepository extends ServiceEntityRepository
+class OpenItemsRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Timesheet::class);
+    public function __construct(
+        private readonly TimesheetRepository $timesheetRepository,
+        private readonly EntityManagerInterface $entityManager,
+    ) {
     }
 
     /**
-     * Find all billable, unexported, completed timesheets.
+     * Find all billable, unexported, completed timesheets visible to $currentUser.
      *
      * @return Timesheet[]
      */
     public function findOpenItems(
+        User $currentUser,
         ?User $user = null,
         ?Customer $customer = null,
-        ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null,
+        ?\DateTimeInterface $dateFrom = null,
+        ?\DateTimeInterface $dateTo = null,
     ): array {
-        $qb = $this->createQueryBuilder('t')
-            ->leftJoin('t.project', 'p')
-            ->leftJoin('p.customer', 'c')
-            ->leftJoin('t.activity', 'a')
-            ->leftJoin('t.user', 'u')
-            ->where('t.billable = :billable')
-            ->andWhere('t.exported = :exported')
-            ->andWhere('t.end IS NOT NULL')
-            ->setParameter('billable', true)
-            ->setParameter('exported', false)
-            ->orderBy('c.name', 'ASC')
-            ->addOrderBy('t.begin', 'ASC');
-
-        if ($customer !== null) {
-            $qb->andWhere('c.id = :customerId')
-               ->setParameter('customerId', $customer->getId());
-        }
+        $query = new TimesheetQuery(false);
+        $query->setCurrentUser($currentUser);
+        $query->setBillable(true);
+        $query->setExported(TimesheetQuery::STATE_NOT_EXPORTED);
+        $query->setState(TimesheetQuery::STATE_STOPPED);
+        $query->setOrderBy('begin');
+        $query->setOrder(TimesheetQuery::ORDER_ASC);
 
         if ($user !== null) {
-            $qb->andWhere('u.id = :userId')
-               ->setParameter('userId', $user->getId());
+            $query->setUser($user);
+        }
+
+        if ($customer !== null) {
+            $query->addCustomer($customer);
         }
 
         if ($dateFrom !== null) {
-            $qb->andWhere('t.begin >= :dateFrom')
-               ->setParameter('dateFrom', $dateFrom);
+            $query->setBegin($dateFrom);
         }
 
         if ($dateTo !== null) {
-            $qb->andWhere('t.begin <= :dateTo')
-               ->setParameter('dateTo', $dateTo);
+            $query->setEnd($dateTo);
         }
 
-        return $qb->getQuery()->getResult();
+        // Kimai batch-loads project, customer, activity and user of all rows (no N+1)
+        return $this->timesheetRepository->getTimesheetsForQuery($query);
     }
 
     /**
-     * Group open items by customer.
+     * Group open items by customer (sorted by customer name).
      *
-     * @return array<int, array{customer: Customer, items: Timesheet[], totalDuration: int, totalRate: float}>
+     * @return array<int, array{customer: Customer, items: Timesheet[]}>
      */
     public function findGroupedByCustomer(
+        User $currentUser,
         ?User $user = null,
         ?Customer $customer = null,
-        ?\DateTimeImmutable $dateFrom = null,
-        ?\DateTimeImmutable $dateTo = null,
+        ?\DateTimeInterface $dateFrom = null,
+        ?\DateTimeInterface $dateTo = null,
     ): array {
-        $items = $this->findOpenItems($user, $customer, $dateFrom, $dateTo);
-
         $groups = [];
-        foreach ($items as $item) {
-            $customer = $item->getProject()->getCustomer();
-            $customerId = $customer->getId();
+        foreach ($this->findOpenItems($currentUser, $user, $customer, $dateFrom, $dateTo) as $item) {
+            $itemCustomer = $item->getProject()->getCustomer();
+            $customerId = $itemCustomer->getId();
             if (!isset($groups[$customerId])) {
                 $groups[$customerId] = [
-                    'customer' => $customer,
+                    'customer' => $itemCustomer,
                     'items' => [],
-                    'totalDuration' => 0,
-                    'totalRate' => 0.0,
                 ];
             }
             $groups[$customerId]['items'][] = $item;
-            $groups[$customerId]['totalDuration'] += $item->getDuration();
-            $groups[$customerId]['totalRate'] += $item->getRate() ?? 0.0;
         }
+
+        uasort($groups, fn (array $a, array $b) => strcasecmp((string) $a['customer']->getName(), (string) $b['customer']->getName()));
 
         return $groups;
     }
 
     /**
-     * Count open billable items.
+     * Year of the oldest open item (for the year filter), null if there is none.
      */
-    public function countOpenItems(): int
+    public function findOldestOpenYear(): ?int
     {
-        $qb = $this->createQueryBuilder('t')
-            ->select('COUNT(t.id)')
+        $min = $this->entityManager->createQueryBuilder()
+            ->select('MIN(t.begin)')
+            ->from(Timesheet::class, 't')
             ->where('t.billable = :billable')
             ->andWhere('t.exported = :exported')
             ->andWhere('t.end IS NOT NULL')
             ->setParameter('billable', true)
-            ->setParameter('exported', false);
+            ->setParameter('exported', false)
+            ->getQuery()
+            ->getSingleScalarResult();
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        return $min === null ? null : (int) substr((string) $min, 0, 4);
     }
 }

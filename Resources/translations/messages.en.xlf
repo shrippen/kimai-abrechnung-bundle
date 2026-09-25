@@ -1,102 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundle">
+  <file source-language="en" target-language="en" datatype="plaintext" original="AbrechnungBundle">
     <body>
       <trans-unit id="a000" resname="menu.abrechnung">
         <source>menu.abrechnung</source>
-        <target>Abrechnung</target>
+        <target>Billing</target>
       </trans-unit>
       <trans-unit id="a001" resname="abrechnung.title">
         <source>abrechnung.title</source>
-        <target>Abrechnungsübersicht</target>
+        <target>Billing overview</target>
       </trans-unit>
       <trans-unit id="a002" resname="abrechnung.month">
         <source>abrechnung.month</source>
-        <target>Monat</target>
+        <target>Month</target>
       </trans-unit>
       <trans-unit id="a003" resname="abrechnung.year">
         <source>abrechnung.year</source>
-        <target>Jahr</target>
+        <target>Year</target>
       </trans-unit>
       <trans-unit id="a004" resname="abrechnung.customer">
         <source>abrechnung.customer</source>
-        <target>Kunde</target>
+        <target>Customer</target>
       </trans-unit>
       <trans-unit id="a005" resname="abrechnung.user">
         <source>abrechnung.user</source>
-        <target>Mitarbeiter</target>
+        <target>User</target>
       </trans-unit>
       <trans-unit id="a006" resname="abrechnung.all">
         <source>abrechnung.all</source>
-        <target>Alle</target>
+        <target>All</target>
       </trans-unit>
       <trans-unit id="a007" resname="abrechnung.date">
         <source>abrechnung.date</source>
-        <target>Datum</target>
+        <target>Date</target>
       </trans-unit>
       <trans-unit id="a008" resname="abrechnung.project">
         <source>abrechnung.project</source>
-        <target>Projekt</target>
+        <target>Project</target>
       </trans-unit>
       <trans-unit id="a009" resname="abrechnung.description">
         <source>abrechnung.description</source>
-        <target>Beschreibung</target>
+        <target>Description</target>
       </trans-unit>
       <trans-unit id="a010" resname="abrechnung.duration">
         <source>abrechnung.duration</source>
-        <target>Dauer</target>
+        <target>Duration</target>
       </trans-unit>
       <trans-unit id="a011" resname="abrechnung.amount">
         <source>abrechnung.amount</source>
-        <target>Betrag</target>
+        <target>Amount</target>
       </trans-unit>
       <trans-unit id="a012" resname="abrechnung.empty">
         <source>abrechnung.empty</source>
-        <target>Keine offenen Positionen – alles abgerechnet! 🎉</target>
+        <target>No open items – everything is billed! 🎉</target>
       </trans-unit>
       <trans-unit id="a013" resname="abrechnung.mark_all_visible">
         <source>abrechnung.mark_all_visible</source>
-        <target>Alle sichtbaren abrechnen</target>
+        <target>Bill all visible</target>
       </trans-unit>
       <trans-unit id="a014" resname="abrechnung.mark_customer">
         <source>abrechnung.mark_customer</source>
-        <target>Kunde abrechnen</target>
+        <target>Bill customer</target>
       </trans-unit>
       <trans-unit id="a015" resname="abrechnung.mark_project">
         <source>abrechnung.mark_project</source>
-        <target>Projekt abrechnen</target>
+        <target>Bill project</target>
       </trans-unit>
       <trans-unit id="a016" resname="abrechnung.mark_entry">
         <source>abrechnung.mark_entry</source>
-        <target>Eintrag abrechnen</target>
+        <target>Bill entry</target>
       </trans-unit>
       <trans-unit id="a017" resname="abrechnung.undo">
         <source>abrechnung.undo</source>
-        <target>Rückgängig</target>
+        <target>Undo</target>
       </trans-unit>
       <trans-unit id="a018" resname="abrechnung.activity">
         <source>abrechnung.activity</source>
-        <target>Tätigkeit</target>
+        <target>Activity</target>
       </trans-unit>
       <trans-unit id="a019" resname="abrechnung.filter">
         <source>abrechnung.filter</source>
-        <target>Filtern</target>
+        <target>Filter</target>
       </trans-unit>
       <trans-unit id="a020" resname="abrechnung.error_title">
         <source>abrechnung.error_title</source>
-        <target>Fehler beim Abrechnen</target>
+        <target>Billing failed</target>
       </trans-unit>
       <trans-unit id="a021" resname="abrechnung.error_request">
         <source>abrechnung.error_request</source>
-        <target>Die Anfrage ist fehlgeschlagen, bitte Seite neu laden.</target>
+        <target>The request failed, please reload the page.</target>
       </trans-unit>
       <trans-unit id="a022" resname="abrechnung.error_skipped">
         <source>abrechnung.error_skipped</source>
-        <target>Keine Berechtigung für Einträge: %ids%</target>
+        <target>No permission for entries: %ids%</target>
       </trans-unit>
       <trans-unit id="a023" resname="abrechnung.error_failed">
         <source>abrechnung.error_failed</source>
-        <target>Speichern fehlgeschlagen für Einträge: %ids%</target>
+        <target>Saving failed for entries: %ids%</target>
       </trans-unit>
     </body>
   </file>

@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en" target-language="de" datatype="plaintext" original="AbrechnungBundleFlash">
+  <file source-language="en" target-language="en" datatype="plaintext" original="AbrechnungBundleFlash">
     <body>
       <trans-unit id="a000" resname="abrechnung.marked_success">
         <source>abrechnung.marked_success</source>
-        <target>Einträge erfolgreich als abgerechnet markiert.</target>
+        <target>Entries successfully marked as billed.</target>
       </trans-unit>
       <trans-unit id="a001" resname="abrechnung.unmarked_success">
         <source>abrechnung.unmarked_success</source>
-        <target>Auswahl erfolgreich als nicht abgerechnet markiert.</target>
+        <target>Selection successfully marked as not billed.</target>
       </trans-unit>
       <trans-unit id="a002" resname="abrechnung.no_selection">
         <source>abrechnung.no_selection</source>
-        <target>Keine Einträge ausgewählt.</target>
+        <target>No entries selected.</target>
       </trans-unit>
       <trans-unit id="a003" resname="abrechnung.invalid_action">
         <source>abrechnung.invalid_action</source>
-        <target>Ungültige Aktion.</target>
+        <target>Invalid action.</target>
       </trans-unit>
       <trans-unit id="a004" resname="abrechnung.skipped">
         <source>abrechnung.skipped</source>
-        <target>Einige Einträge wurden mangels Berechtigung übersprungen.</target>
+        <target>Some entries were skipped due to missing permissions.</target>
       </trans-unit>
       <trans-unit id="a005" resname="abrechnung.failed">
         <source>abrechnung.failed</source>
-        <target>Einige Einträge konnten nicht gespeichert werden.</target>
+        <target>Some entries could not be saved.</target>
       </trans-unit>
     </body>
   </file>
