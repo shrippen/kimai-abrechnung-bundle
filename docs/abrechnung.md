@@ -15,13 +15,15 @@ Die Seite **Rechnungen › Abrechnung** zeigt alle abrechenbaren, beendeten Zeit
 
 ## Abrechnen
 
-- Einträge per Checkbox auswählen (die Checkbox im Tabellenkopf wählt alle Einträge des Kunden), dann unten in der
+- Einträge per Checkbox auswählen (die Checkbox im Tabellenkopf wählt alle Einträge des Kunden, die im Projektkopf alle
+  des Projekts), dann unten in der
   Leiste **Abrechnen**.
 - Einzelne Einträge, ganze Projekte oder Kunden auch über das **…**-Menü der Zeile bzw. Gruppe.
 - **Alle sichtbaren abrechnen** oben rechts rechnet alle Einträge der aktuellen Auswahl ab.
-- Abgerechnete Einträge verschwinden aus der Liste. Der Hinweis oben bietet **Rückgängig** an.
+- Abgerechnete Einträge verschwinden aus der Liste. Der Hinweis oben bietet **Rückgängig** an: 15 Minuten lang, im selben
+  Browser, nur für die eigene Aktion und nur, solange die Einträge seitdem nicht geändert wurden.
 - Unter Status **Abgerechnet** lassen sich Einträge mit **Zurücknehmen** wieder öffnen
-  (Berechtigung „Exportierte Einträge bearbeiten“; eigene Abrechnungen der letzten 15 Minuten gehen auch ohne).
+  (Berechtigung „Exportierte Einträge bearbeiten“; „Rückgängig“ im Hinweis geht auch ohne).
 
 „Abgerechnet“ ist Kimais Kennzeichen „exportiert“. **Im Kimai-Export öffnen** öffnet Kimais Export mit derselben Auswahl.
 

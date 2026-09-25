@@ -48,7 +48,7 @@ Das Plugin verwendet bestehende Kimai-Berechtigungen:
 |--------|-------------|
 | Seite anzeigen | `view_invoice` |
 | Einträge abrechnen/abwählen | `edit_export_own_timesheet` / `edit_export_other_timesheet` |
-| Abgerechnete (= exportierte) Einträge zurücknehmen | zusätzlich `edit_exported_timesheet` (Ausnahme: „Rückgängig“ für Einträge, die dieselbe Sitzung in den letzten 15 Minuten abgerechnet hat) |
+| Abgerechnete (= exportierte) Einträge zurücknehmen | zusätzlich `edit_exported_timesheet` (Ausnahme: „Rückgängig“ der eigenen Aktion – gleicher Benutzer, gleiche Sitzung, höchstens 15 Minuten, nach [GUIDELINES 3.5](https://github.com/shrippen/kimai-plugin-ui/blob/main/GUIDELINES.md)) |
 | Beträge sehen | `view_rate_own_timesheet` / `view_rate_other_timesheet` |
 
 Sichtbar sind – wie auf Kimais Zeiterfassungs-Seiten – nur die eigenen Einträge und die der Teams, die man leitet (Admins sehen alle). Die Kunden- und Benutzer-Filter (Kimais `CustomerType`/`UserType`) enthalten ebenfalls nur sichtbare Kunden bzw. aktive Benutzer.
@@ -58,7 +58,7 @@ Sichtbar sind – wie auf Kimais Zeiterfassungs-Seiten – nur die eigenen Eintr
 - **Keine eigene Datenbank** – nutzt das bestehende `exported`-Flag der Timesheet-Entität
 - **Abfrage**: `TimesheetRepository::getTimesheetsForQuery()` mit `TimesheetQuery` (inkl. Team-Berechtigungen, wie Kimais eigene Listen)
 - **Filter**: `AbrechnungQuery` + `AbrechnungToolbarForm` (Kimai-Toolbar, `handleSearch()` inkl. Standardfilter); Zeitraum als `?period=YYYY-MM` bzw. `?period=YYYY`, ohne `period` alle Zeiträume. Alte Parameter `year`, `month`, `customer`, `user` werden umgeleitet
-- **Endpunkt**: POST `/de/abrechnung/mark` mit `ids[]` (oder `timesheets[]`), `action=mark|unmark` (Formular oder Query) und CSRF-Token `_token` (ID `abrechnung.mark`). Der Endpunkt setzt den Status (kein Toggle) und ist damit idempotent. Mit `X-Requested-With: XMLHttpRequest` oder `Accept: application/json` antwortet er mit `{success, states: {id: bool}, changed: [id], skipped: [id], failed: [id], message, undo: {url, token, ids}}` (HTTP 422, wenn nichts geändert werden konnte), sonst mit Redirect und Ergebnis-Hinweis
+- **Endpunkt**: POST `/de/abrechnung/mark` mit `ids[]` (oder `timesheets[]`), `action=mark|unmark` (Formular oder Query) und CSRF-Token `_token` (ID `abrechnung.mark`). Der Endpunkt setzt den Status (kein Toggle) und ist damit idempotent. Mit `X-Requested-With: XMLHttpRequest` oder `Accept: application/json` antwortet er mit `{success, states: {id: bool}, changed: [id], skipped: [id], failed: [id], message, undo: {url, token, ids}}` (HTTP 422, wenn nichts geändert werden konnte), sonst mit Redirect und Ergebnis-Hinweis. `undo.url` zeigt auf POST `/de/abrechnung/undo/{id}` (`_token`, optional `ids[]` als Teilmenge): macht genau diese Aktion rückgängig, nur für denselben Benutzer in derselben Sitzung, höchstens 15 Minuten lang und nur für Einträge, die seitdem nicht geändert wurden (sonst HTTP 410/403/409 mit `message`)
 - **Persistenz**: `TimesheetService::saveTimesheet()` pro Eintrag – gleicher Code-Pfad wie Kimais API-Endpunkt `PATCH /api/timesheets/{id}/export` (inkl. Timesheet-Events). Kimais Export-Button nutzt dagegen `TimesheetRepository::setExported()` (DQL-Bulk-Update ohne Events, kann nur markieren)
 - **Rollback**: Plugin-Ordner löschen + Container-Neustart, keine DB-Migrationen nötig
 

@@ -36,10 +36,11 @@ Verbindlich ist der gemeinsame UI-Leitfaden [kimai-plugin-ui](https://github.com
 - Kunde → Projekt → Einträge; Kunde als `kit.group_header` (Kartenkopf), Projekt als Zwischenzeile (`as_row`, `level: 2`),
   beide mit Farbpunkt und Summen (Dauer, Betrag)
 - Zeilen mit Kimais `macros/datatables.html.twig` (Kopf/Fuß, Spaltenklassen für Mobil)
-- Auswahl per Checkbox (Kopf-Checkbox = ganzer Kunde) und Sammelleiste `kit.bulk_bar`; „…“ pro Zeile und Gruppe
+- Auswahl per Checkbox und Sammelleiste `kit.bulk_bar`; Gruppen-Auswahl mit Kit 0.2: Kopf-Checkbox = ganzer Kunde (`kit.bulk_select_group`), Checkbox im Projektkopf (`group_header({select})`), Zeilen mit Gruppen-Schlüsseln `c<Kunde>`/`c<Kunde>-p<Projekt>`; kein eigenes Auswahl-Skript
+- „…“ pro Zeile und Gruppe: Abrechnen/Zurücknehmen als Sofort-Aktion (`data-kpu-post`)
 
 ### Abrechnen und Rückgängig
-- Abrechnen ist umkehrbar: sofort ausführen, Seite neu laden, Hinweis mit „Rückgängig“ (`KimaiPluginUi`-Toast → `action=unmark`)
+- Abrechnen ist umkehrbar: sofort ausführen, Seite neu laden, Hinweis mit „Rückgängig“ (Kit-Toast → `abrechnung_undo`, Rückgängig-Fenster nach GUIDELINES 3.5)
 - Der Client schickt immer die gewünschte Aktion (`action=mark|unmark`), der Server setzt den Status (kein Toggle).
   Doppelklicks oder Sammelaktionen über teils abgerechnete Einträge nehmen so nichts versehentlich zurück
 - Abgerechnete Einträge erscheinen nur mit Status-Filter „Abgerechnet“/„Alle“, als `kit.status_badge('billed')`
@@ -73,10 +74,11 @@ Keine eigenen Permissions – vermeidet Rollen-Duplikate im Kimai-Admin.
 - Gruppierung in PHP (nach Customer → Project)
 
 ### Controller
-- `AbrechnungController`: GET-Index + POST-Mark
+- `AbrechnungController`: GET-Index, POST-Mark, POST-Undo
 - AJAX-Erkennung: `X-Requested-With: XMLHttpRequest` Header
 - CSRF-Token (`abrechnung.mark`) wird im AJAX- und Formular-Pfad geprüft
-- `action=mark|unmark` setzt `exported` für alle übergebenen IDs (idempotent); Rechte pro Eintrag über den Voter `edit_export`, Zurücknehmen zusätzlich `edit_exported_timesheet` – außer für Einträge, die dieselbe Sitzung vor höchstens 15 Minuten abgerechnet hat („Rückgängig“)
+- `action=mark|unmark` setzt `exported` für alle übergebenen IDs (idempotent); Rechte pro Eintrag über den Voter `edit_export`, Zurücknehmen zusätzlich `edit_exported_timesheet` (wie Kimais API, ohne Ausnahme)
+- `undo/{id}`: Rückgängig-Fenster nach GUIDELINES 3.5 – Mark legt `abrechnung.undo.<id>` in der Session ab (Benutzer, IDs, vorheriger Zustand, `modified_at` je Eintrag, Zeit); Undo nur mit diesem Eintrag, gleicher Benutzer, ≤ 15 min, nur diese IDs, nur unveränderte Einträge; danach wird der Eintrag gelöscht. Innerhalb des Fensters ist `edit_exported_timesheet` für die Rücknahme der eigenen Abrechnung nicht nötig (vom Product Owner freigegeben), `edit_export` schon
 - Fehler beim Speichern werden pro Eintrag abgefangen und gemeldet
 - Response: `{success, states: {id: bool, ...}, changed: [id], skipped: [id], failed: [id], message, undo}`
 - Beträge nur mit `view_rate` (Voter) sichtbar; Summen werden ausgeblendet, sobald ein Eintrag der Gruppe verborgen ist
