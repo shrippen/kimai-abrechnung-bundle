@@ -151,15 +151,15 @@
                                 <td class="{{ datatable_column_class('abrechnung', 'select') }}">
                                     {%- if row.can_mark or row.can_unmark %}{{ kit.bulk_checkbox(bulk_form, item.id, null, [customer_group, project_group]) }}{% endif -%}
                                 </td>
-                                <td class="{{ datatable_column_class('abrechnung', 'date') }}">{{ item.begin|date_short }}</td>
+                                <td class="{{ datatable_column_class('abrechnung', 'date') }} kpu-num">{{ item.begin|date_short }}</td>
                                 <td class="{{ datatable_column_class('abrechnung', 'description') }}">
                                     {%- if item.description is not empty %}{{ item.description }}{% else %}<span class="text-body-secondary">{{ item.activity.name }}</span>{% endif -%}
                                 </td>
                                 <td class="{{ datatable_column_class('abrechnung', 'activity') }}">{{ item.activity.name }}</td>
                                 <td class="{{ datatable_column_class('abrechnung', 'user') }}">{{ item.user.displayName }}</td>
-                                <td class="{{ datatable_column_class('abrechnung', 'duration') }}">{{ item.duration|duration }}</td>
+                                <td class="{{ datatable_column_class('abrechnung', 'duration') }} kpu-num">{{ item.duration|duration }}</td>
                                 {% if can_view_rate %}
-                                    <td class="{{ datatable_column_class('abrechnung', 'rate') }}">{% if row.rate_visible %}{{ item.rate|money(currency) }}{% else %}&ndash;{% endif %}</td>
+                                    <td class="{{ datatable_column_class('abrechnung', 'rate') }} kpu-num">{% if row.rate_visible %}{{ item.rate|money(currency) }}{% else %}&ndash;{% endif %}</td>
                                 {% endif %}
                                 {% if show_status %}
                                     <td class="{{ datatable_column_class('abrechnung', 'status') }}">{{ kit.status_badge(item.exported ? 'billed' : 'open') }}</td>
