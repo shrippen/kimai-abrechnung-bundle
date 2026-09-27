@@ -2,7 +2,7 @@
     "name": "arianw/kimai-abrechnung-bundle",
     "description": "Kimai plugin: Billing overview for billable, unfinished-export timesheets grouped by customer",
     "type": "kimai-plugin",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "keywords": [
         "kimai",
         "kimai-plugin",
