@@ -41,5 +41,9 @@
       "name": "billing",
       "url": "/{lang}/abrechnung"
     }
-  ]
+  ],
+  "page": {
+    "abrechnung.jpg": "billing"
+  },
+  "page_theme": "default"
 }
