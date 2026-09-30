@@ -62,6 +62,14 @@ Legende: `[x]` erledigt, `[ ]` offen (mit Grund).
 - [x] Dunkelmodus: keine eigenen Farben, nur Tabler-Klassen/Kit
 - [x] Kein Inline-Handler, JS startet auf `kimai.initialized`, POST mit CSRF
 
+## Knust 1.3 (Kante 1.7)
+
+Geprüft gegen Knust-Branch `kante-1-7` (statisch aus den Twig-Templates gerendert, Tabler 1.4, 1280/390 px, hell/dunkel).
+- [x] Keine eigenen Farben, Schriften, Fokus-Stile, kein eigenes CSS/JS, kein Diagramm: alles über Tabler, Kit 0.5.0 (`bin/sync.sh --check` sauber) und Knust
+- [x] Ausgewählte Zeilen cyan (Auswahlspalte trägt `multiCheckbox`), Fokusring cyan, Leerzustand/Info cyan, Projektzeilen mit Knusts Gruppenbalken
+- [ ] Status „Abgerechnet“ (`kit.status_badge('billed')` → `bg-blue-lt`) ist mit Knust hell fast so cyan wie Auswahl und Fokus (`#076678` gegen `#0f6b66`). Braucht eine eigene Zustandsfarbe im Kit/Knust, nicht hier
+- [ ] 390 px, Status Abgerechnet/Alle: mit Knust ist die Tabelle ~16 px breiter als die Karte (Knusts `kpu-status`-Umriss in Großbuchstaben mit Sperrung), das „…“ liegt im waagrechten Scrollbereich. Ohne Knust passt sie. Fix gehört nach Knust (schmalere Badges/Zellen unter 576 px)
+
 ## Doku
 - [x] README und design.md verweisen auf die GUIDELINES, widersprüchliche Abschnitte (Knopf-Typen, Durchstreichen) ersetzt
 - [x] `docs/abrechnung.md` als Hilfe-Seite
