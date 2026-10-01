@@ -2,7 +2,7 @@
 
 ## GUI rule
 
-- This project is a Kimai plugin. Its GUI is generated from Knust (`shrippen/kimai-knust-bundle`),
+- This project is a Kimai plugin. Its GUI is generated from Knust (`kimai/knust/` in shrippen/Kante),
   the Kante spinoff that adapts Kante to Kimai's look, and the UI kit (`shrippen/kimai-plugin-ui`,
   `kpu-*` markers and macros), not inspired by them: use their tokens, classes, markers, macros and
   components as they are. The kit in `Resources/views/_kit/` changes only through `bin/sync.sh`.
@@ -12,7 +12,7 @@
 - A missing element is added to Knust or the kit first, then used here. Never solve it locally.
   Where it would also help other projects, it is added to Kante as well
   (https://github.com/shrippen/shrippen.github.io, `kante/`).
-- Rule text for all projects: https://github.com/shrippen/shrippen.github.io/blob/main/kante/AGENT-RULE.md
+- Rule text for all projects: https://github.com/shrippen/Kante/blob/main/AGENT-RULE.md
 
 ## Repository rule
 
