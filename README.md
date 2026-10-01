@@ -15,8 +15,8 @@ Ein Kimai Plugin für die Abrechnungsübersicht. Zeigt alle abrechenbaren, noch 
 ## Oberfläche
 
 Die Oberfläche folgt dem gemeinsamen UI-Leitfaden der Plugins
-[kimai-plugin-ui](https://github.com/shrippen/kimai-plugin-ui) (`GUIDELINES.md`, `CHECKLIST.md`). Das UI-Kit liegt in
-`Resources/views/_kit/` und `Resources/translations/kpu.*.xlf` und wird nur per `bin/sync.sh` aktualisiert, nie von Hand.
+[kimai-plugin-ui](https://github.com/shrippen/Kante/tree/main/kimai/kit) (`GUIDELINES.md`, `CHECKLIST.md`). Das UI-Kit liegt in
+`Resources/views/_kit/` und `Resources/translations/kpu.*.xlf` und wird nur per `kimai/kit/bin/sync.sh` aus dem Kante-Repo aktualisiert, nie von Hand.
 Stand der Umstellung: [UI-TODO.md](UI-TODO.md).
 
 ## Voraussetzungen
@@ -48,7 +48,7 @@ Das Plugin verwendet bestehende Kimai-Berechtigungen:
 |--------|-------------|
 | Seite anzeigen | `view_invoice` |
 | Einträge abrechnen/abwählen | `edit_export_own_timesheet` / `edit_export_other_timesheet` |
-| Abgerechnete (= exportierte) Einträge zurücknehmen | zusätzlich `edit_exported_timesheet` (Ausnahme: „Rückgängig“ der eigenen Aktion – gleicher Benutzer, gleiche Sitzung, höchstens 15 Minuten, nach [GUIDELINES 3.5](https://github.com/shrippen/kimai-plugin-ui/blob/main/GUIDELINES.md)) |
+| Abgerechnete (= exportierte) Einträge zurücknehmen | zusätzlich `edit_exported_timesheet` (Ausnahme: „Rückgängig“ der eigenen Aktion – gleicher Benutzer, gleiche Sitzung, höchstens 15 Minuten, nach [GUIDELINES 3.5](https://github.com/shrippen/Kante/blob/main/kimai/kit/GUIDELINES.md)) |
 | Beträge sehen | `view_rate_own_timesheet` / `view_rate_other_timesheet` |
 
 Sichtbar sind – wie auf Kimais Zeiterfassungs-Seiten – nur die eigenen Einträge und die der Teams, die man leitet (Admins sehen alle). Die Kunden- und Benutzer-Filter (Kimais `CustomerType`/`UserType`) enthalten ebenfalls nur sichtbare Kunden bzw. aktive Benutzer.
