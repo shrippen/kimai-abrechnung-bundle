@@ -22,7 +22,7 @@ Das Plugin zeigt offene Positionen und ermöglicht das Abhaken.
 
 ## UI-Struktur
 
-Verbindlich ist der gemeinsame UI-Leitfaden [kimai-plugin-ui](https://github.com/shrippen/kimai-plugin-ui)
+Verbindlich ist der gemeinsame UI-Leitfaden [kimai-plugin-ui](https://github.com/shrippen/Kante/tree/main/kimai/kit)
 (`GUIDELINES.md`, `CHECKLIST.md`). Hier steht nur, wie die Abrechnung ihn umsetzt; bei Widerspruch gilt der Leitfaden.
 
 ### Seitenkopf

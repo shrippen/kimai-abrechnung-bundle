@@ -1,6 +1,6 @@
 # UI-TODO – Umstellung auf kimai-plugin-ui
 
-Grundlage: [kimai-plugin-ui](https://github.com/shrippen/kimai-plugin-ui) `GUIDELINES.md` und `CHECKLIST.md` (Kit 0.2.0),
+Grundlage: [kimai-plugin-ui](https://github.com/shrippen/Kante/tree/main/kimai/kit) `GUIDELINES.md` und `CHECKLIST.md` (Kit 0.2.0),
 Plan „AB Abrechnung“ aus dem UI-Leitfaden (Abschnitt 6) und die UI-Inventur.
 Legende: `[x]` erledigt, `[ ]` offen (mit Grund).
 
