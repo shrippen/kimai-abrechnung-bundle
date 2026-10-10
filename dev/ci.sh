@@ -62,7 +62,7 @@ check() {
     test -z "$expect" || grep -q "$expect" "$body" || fail "$url: missing \"$expect\""
     echo "ok $url"
 }
-check "/en/abrechnung" 200 "All customers"
+check "/en/abrechnung" 200 "Billing"
 
 if grep -E 'CRITICAL|PHP (Fatal|Warning)' "$LOG"; then
     fail "errors in the server log"
