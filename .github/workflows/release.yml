@@ -1,6 +1,6 @@
 # Tag vX.Y.Z (must match composer.json's "version").
-#   ──► lint ──► build AbrechnungBundle-X.Y.Z.zip ──► release with notes from CHANGELOG.md (if it has a
-#   matching heading), zip attached.
+#   ──► lint ──► build AbrechnungBundle-X.Y.Z.zip ──► release with notes from CHANGELOG.md (its section for
+#   the version, required), zip attached.
 #
 # GitHub only: GitHub is the public channel and the only one with release files. Gitea runs the
 # checks and gets the release without files (rule "Gitea prüft, GitHub veröffentlicht"); the job
@@ -50,15 +50,16 @@ jobs:
           if unzip -Z1 "$ZIP" | grep -q "/demo/"; then echo "error: internal demo in $ZIP" >&2; exit 1; fi
 
       - name: Release notes
+        # The section "## [X.Y.Z] — date" of CHANGELOG.md is the release text; no section, no release.
         run: |
-          if [ -f CHANGELOG.md ] && grep -qE "^## v?$VERSION( |$)" CHANGELOG.md; then
-            awk -v v="$VERSION" '
-              $0 ~ "^## v?" v "( |$)" { on = 1; next }
-              /^## /                  { on = 0 }
-              on
-            ' CHANGELOG.md > notes.md
-          else
-            echo "Abrechnung $VERSION." > notes.md
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[?v?" v "\\]?( |$)" { on = 1; next }
+            /^## /                            { on = 0 }
+            on
+          ' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "error: no section for $VERSION in CHANGELOG.md" >&2
+            exit 1
           fi
 
       - name: Publish on GitHub
