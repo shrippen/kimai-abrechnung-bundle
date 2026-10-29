@@ -61,6 +61,11 @@ yet exported, grouped by customer; marks them as exported (with undo) or reopens
   without it) and as a new entry at the top of `#changes` in `docs/index.html`; from the fourth entry
   on, the oldest move into `details.changelog-more`. Bump the footer version. A release is done when
   the landing page shows it.
+- The notes come from `scripts/release-notes.sh X.Y.Z` (Gitea too: `scripts/release-notes.sh X.Y.Z >
+  notes.md`, then `tea release create --tag vX.Y.Z --title … --note-file notes.md`); CI checks the
+  headings (`scripts/release-notes.sh --check`). The script is a copy of Kante's
+  `tools/release-notes.sh`: change it only there, then sync with
+  `../Kante/tools/sync-release-notes.sh "$PWD"`.
 
 ## GUI rule
 

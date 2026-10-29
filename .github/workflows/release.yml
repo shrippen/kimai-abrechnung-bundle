@@ -51,16 +51,10 @@ jobs:
 
       - name: Release notes
         # The section "## [X.Y.Z] — date" of CHANGELOG.md is the release text; no section, no release.
+        # scripts/release-notes.sh is a copy of Kante's tools/release-notes.sh.
         run: |
-          awk -v v="$VERSION" '
-            $0 ~ "^## \\[?v?" v "\\]?( |$)" { on = 1; next }
-            /^## /                            { on = 0 }
-            on
-          ' CHANGELOG.md > notes.md
-          if ! grep -q '[^[:space:]]' notes.md; then
-            echo "error: no section for $VERSION in CHANGELOG.md" >&2
-            exit 1
-          fi
+          scripts/release-notes.sh "$VERSION" > notes.md
+          cat notes.md
 
       - name: Publish on GitHub
         env:
