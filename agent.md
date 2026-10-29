@@ -51,6 +51,16 @@ yet exported, grouped by customer; marks them as exported (with undo) or reopens
   and `dev/ci.sh`, which installs the release zip into Kimai 2.67 and loads the pages.
 - `demo/` (screenshots) and `dev/` never ship: `.gitattributes` keeps them out of the zip,
   `services.yaml` excludes them.
+- Every release gets its release log before the tag: a section `## [X.Y.Z] — date` in
+  `CHANGELOG.md`, in English and German, each with a lead (what the release is about), then the
+  changes grouped as New, Improved, Fixed and Note (breaking changes, steps the user must take). Each
+  point says what changed for the user and why, not which code moved; then the compare link. Graphics
+  wherever possible: a screenshot from the demo world per visible change
+  (`docs/shots/release-<version>-<name>-<lang>.webp`), a diagram (Kante `.flow`) for changes inside.
+- The same text goes into the Gitea release notes (the release workflow takes it for GitHub and stops
+  without it) and as a new entry at the top of `#changes` in `docs/index.html`; from the fourth entry
+  on, the oldest move into `details.changelog-more`. Bump the footer version. A release is done when
+  the landing page shows it.
 
 ## GUI rule
 
