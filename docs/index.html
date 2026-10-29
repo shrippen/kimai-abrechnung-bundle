@@ -25,7 +25,7 @@
 <nav class="nav"><div class="nav-inner">
   <a class="nav-brand" href="#"><img src="icon.svg" alt="">Abrechnung</a>
   <div class="nav-links">
-    <a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#workflow"><span lang="en">Workflow</span><span lang="de">Ablauf</span></a><a href="#install"><span lang="en">Install</span><span lang="de">Installation</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a><a href="#faq"><span lang="en">FAQ</span><span lang="de">FAQ</span></a><a class="nav-hl" href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a>
+    <a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#workflow"><span lang="en">Workflow</span><span lang="de">Ablauf</span></a><a href="#install"><span lang="en">Install</span><span lang="de">Installation</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a><a href="#faq"><span lang="en">FAQ</span><span lang="de">FAQ</span></a><a href="#changes"><span lang="en">Changes</span><span lang="de">Änderungen</span></a><a class="nav-hl" href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="de" aria-pressed="false">DE</button>
@@ -106,6 +106,51 @@ docker restart CONTAINER</div></section>
   <ul lang="en"><li><strong>No own database</strong> — uses the existing <code>exported</code> flag of the timesheet entity</li><li><strong>Query</strong> — <code>TimesheetRepository::getTimesheetsForQuery()</code>, including team permissions, like Kimai’s own lists</li><li><strong>Endpoint</strong> — POST <code>/de/abrechnung/mark</code> with <code>ids[]</code>, <code>action=mark|unmark</code> and a CSRF token; it sets the status instead of toggling it, so it is idempotent</li><li><strong>Persistence</strong> — <code>TimesheetService::saveTimesheet()</code>, the same code path as Kimai’s API endpoint <code>PATCH /api/timesheets/{id}/export</code></li><li><strong>Rollback</strong> — delete the plugin folder and restart the container; no migrations needed</li></ul><ul lang="de"><li><strong>Keine eigene Datenbank</strong> – nutzt das vorhandene <code>exported</code>-Flag der Timesheet-Entität</li><li><strong>Abfrage</strong> – <code>TimesheetRepository::getTimesheetsForQuery()</code>, inklusive Team-Berechtigungen, wie Kimais eigene Listen</li><li><strong>Endpunkt</strong> – POST <code>/de/abrechnung/mark</code> mit <code>ids[]</code>, <code>action=mark|unmark</code> und CSRF-Token; er setzt den Status, statt ihn umzuschalten, und ist damit idempotent</li><li><strong>Persistenz</strong> – <code>TimesheetService::saveTimesheet()</code>, derselbe Codepfad wie Kimais API-Endpunkt <code>PATCH /api/timesheets/{id}/export</code></li><li><strong>Rollback</strong> – Plugin-Ordner löschen und Container neu starten; keine Migrationen nötig</li></ul>
 </section>
 <section class="section" id="faq"><h2 lang="en">Questions</h2><h2 lang="de">Fragen</h2><div class="faq"><details><summary><span lang="en">Does it change my data?</span><span lang="de">Ändert es meine Daten?</span></summary><div><p lang="en">It only sets the <code>exported</code> flag that Kimai already has on every timesheet entry, through the same code path as Kimai’s own API endpoint for the export flag. Nothing else is written.</p><p lang="de">Es setzt nur das Flag <code>exported</code>, das Kimai an jedem Zeiteintrag ohnehin hat, über denselben Code-Pfad wie Kimais eigener API-Endpunkt für das Export-Flag. Sonst wird nichts geschrieben.</p></div></details><details><summary><span lang="en">Which entries are listed?</span><span lang="de">Welche Einträge werden angezeigt?</span></summary><div><p lang="en">Every entry that is billable, not yet exported and finished. Running entries and entries you already billed do not appear in the open list; switch the status to <strong>Billed</strong> or <strong>All</strong> to see them.</p><p lang="de">Jeder Eintrag, der abrechenbar, noch nicht exportiert und beendet ist. Laufende Einträge und bereits abgerechnete Einträge erscheinen nicht in der offenen Liste; stelle den Status auf <strong>Abgerechnet</strong> oder <strong>Alle</strong>, um sie zu sehen.</p></div></details><details><summary><span lang="en">Can I undo a billing?</span><span lang="de">Kann ich das Abrechnen zurücknehmen?</span></summary><div><p lang="en">Yes. Right after billing, the notice offers <strong>Undo</strong> for 15 minutes. Later, switch the status to <strong>Billed</strong> and use <strong>Reopen</strong>; that needs the permission <code>edit_exported_timesheet</code>.</p><p lang="de">Ja. Direkt nach dem Abrechnen bietet der Hinweis 15 Minuten lang <strong>Rückgängig</strong>. Später stellst du den Status auf <strong>Abgerechnet</strong> und nutzt <strong>Zurücknehmen</strong>; dafür brauchst du das Recht <code>edit_exported_timesheet</code>.</p></div></details><details><summary><span lang="en">How do I remove it?</span><span lang="de">Wie entferne ich es?</span></summary><div><p lang="en">Delete the plugin folder and restart the container. There are no database migrations to revert.</p><p lang="de">Lösche den Plugin-Ordner und starte den Container neu. Es gibt keine Datenbank-Migrationen, die zurückgenommen werden müssten.</p></div></details></div></section>
+<section class="section" id="changes">
+  <h2 lang="en">Changes</h2><h2 lang="de">Änderungen</h2>
+  <p lang="en">What each release brought, newest first. Every release adds an entry here and the same notes on the release page.</p><p lang="de">Was jede Version gebracht hat, die neueste zuerst. Jede Version bekommt hier einen Eintrag und dieselben Notizen auf der Release-Seite.</p>
+  <ol class="changelog">
+    <li class="release" id="v1.1.1">
+      <div class="release-head"><b class="release-version">1.1.1</b><time datetime="2026-10-29"><span lang="en">29 Oct 2026</span><span lang="de">29. Okt. 2026</span></time></div>
+      <div class="release-body">
+        <p class="release-lead"><span lang="en">A fix for billing in Firefox: after billing, no entries stay selected.</span><span lang="de">Eine Korrektur fürs Abrechnen in Firefox: Nach dem Abrechnen bleibt kein Eintrag markiert.</span></p>
+        <div class="release-group" data-kind="fixed"><h3><span lang="en">Fixed</span><span lang="de">Behoben</span></h3><ul>
+          <li><span lang="en">After <strong>Mark as billed</strong>, Firefox ticked the next open entries, because it restores checkboxes by their position when the page reloads and the billed rows were gone. The selection now starts empty after every load.</span><span lang="de">Nach <strong>Abrechnen</strong> markierte Firefox die nächsten offenen Einträge, weil er Checkboxen beim Neuladen nach ihrer Position wiederherstellt und die abgerechneten Zeilen fehlten. Die Auswahl ist jetzt nach jedem Laden leer.</span></li>
+        </ul></div>
+        <div class="release-group" data-kind="improved"><h3><span lang="en">Improved</span><span lang="de">Verbessert</span></h3><ul>
+          <li><span lang="en">Buttons, notices and status labels follow the current Kimai plugin kit (0.9.1).</span><span lang="de">Buttons, Hinweise und Statusanzeigen folgen dem aktuellen Kimai-Plugin-Kit (0.9.1).</span></li>
+        </ul></div>
+        <a class="release-notes" href="https://github.com/shrippen/kimai-abrechnung-bundle/compare/v1.1.0...v1.1.1"><span lang="en">All changes since 1.1.0 →</span><span lang="de">Alle Änderungen seit 1.1.0 →</span></a>
+      </div>
+    </li>
+    <li class="release" id="v1.1.0">
+      <div class="release-head"><b class="release-version">1.1.0</b><time datetime="2026-09-02"><span lang="en">2 Sep 2026</span><span lang="de">2. Sep. 2026</span></time></div>
+      <div class="release-body">
+        <p class="release-lead"><span lang="en">Each entry row now names its activity.</span><span lang="de">Jede Eintragszeile nennt jetzt ihre Tätigkeit.</span></p>
+        <div class="release-group" data-kind="new"><h3><span lang="en">New</span><span lang="de">Neu</span></h3><ul>
+          <li><span lang="en">New column <strong>Activity</strong> in the entry list, between description and user.</span><span lang="de">Neue Spalte <strong>Tätigkeit</strong> in der Eintragsliste, zwischen Beschreibung und Mitarbeiter.</span></li>
+        </ul></div>
+        <a class="release-notes" href="https://github.com/shrippen/kimai-abrechnung-bundle/compare/v1.0.0...v1.1.0"><span lang="en">All changes since 1.0.0 →</span><span lang="de">Alle Änderungen seit 1.0.0 →</span></a>
+      </div>
+    </li>
+    <li class="release" id="v1.0.0">
+      <div class="release-head"><b class="release-version">1.0.0</b><time datetime="2026-09-01"><span lang="en">1 Sep 2026</span><span lang="de">1. Sep. 2026</span></time></div>
+      <div class="release-body">
+        <p class="release-lead"><span lang="en">The first release: one page with every billable entry that is not exported yet, grouped by customer and project.</span><span lang="de">Die erste Version: eine Seite mit allen abrechenbaren, noch nicht exportierten Einträgen, gruppiert nach Kunde und Projekt.</span></p>
+        <div class="release-group" data-kind="new"><h3><span lang="en">New</span><span lang="de">Neu</span></h3><ul>
+          <li><span lang="en">Customer → project → entries, with sums of duration and amount.</span><span lang="de">Kunde → Projekt → Einträge, mit Summen für Dauer und Betrag.</span></li>
+          <li><span lang="en">Bill a single entry, a project, a customer or everything at once, without reloading; billed entries are struck through and can be undone.</span><span lang="de">Einen Eintrag, ein Projekt, einen Kunden oder alles auf einmal abrechnen, ohne Neuladen; abgerechnete Einträge werden durchgestrichen und lassen sich zurücknehmen.</span></li>
+          <li><span lang="en">Filter by month, year, customer and user.</span><span lang="de">Filter nach Monat, Jahr, Kunde und Mitarbeiter.</span></li>
+          <li><span lang="en">Menu item <strong>Billing</strong> under <strong>Invoices</strong>.</span><span lang="de">Menüpunkt <strong>Abrechnung</strong> unter <strong>Rechnungen</strong>.</span></li>
+        </ul></div>
+        <div class="release-group" data-kind="note"><h3><span lang="en">Note</span><span lang="de">Hinweis</span></h3><ul>
+          <li><span lang="en">No own database tables and no migration: the plugin only sets Kimai’s <code>exported</code> flag. Remove it by deleting the folder.</span><span lang="de">Keine eigenen Datenbanktabellen und keine Migration: Das Plugin setzt nur Kimais Flag <code>exported</code>. Entfernen durch Löschen des Ordners.</span></li>
+          <li><span lang="en">Needs the permissions <code>view_invoice</code> and <code>edit_export_*_timesheet</code>; Kimai 2.65 or newer, PHP 8.1 or newer.</span><span lang="de">Braucht die Rechte <code>view_invoice</code> und <code>edit_export_*_timesheet</code>; Kimai 2.65 oder neuer, PHP 8.1 oder neuer.</span></li>
+        </ul></div>
+      </div>
+    </li>
+  </ol>
+</section>
 </main>
 
 <footer class="foot">
@@ -115,11 +160,11 @@ docker restart CONTAINER</div></section>
       <div><span class="foot-name">Abrechnung</span><span class="foot-tag"><span lang="en">Billing overview for Kimai</span><span lang="de">Abrechnungsübersicht für Kimai</span></span></div>
     </div>
     <nav class="foot-cols" aria-label="Footer">
-      <div><h4><span lang="en">Project</span><span lang="de">Projekt</span></h4><a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#workflow"><span lang="en">Workflow</span><span lang="de">Ablauf</span></a><a href="#install"><span lang="en">Install</span><span lang="de">Installation</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a><a href="#faq"><span lang="en">FAQ</span><span lang="de">FAQ</span></a></div>
+      <div><h4><span lang="en">Project</span><span lang="de">Projekt</span></h4><a href="#features"><span lang="en">Features</span><span lang="de">Funktionen</span></a><a href="#workflow"><span lang="en">Workflow</span><span lang="de">Ablauf</span></a><a href="#install"><span lang="en">Install</span><span lang="de">Installation</span></a><a href="#permissions"><span lang="en">Permissions</span><span lang="de">Rechte</span></a><a href="#tech"><span lang="en">Technology</span><span lang="de">Technik</span></a><a href="#faq"><span lang="en">FAQ</span><span lang="de">FAQ</span></a><a href="#changes"><span lang="en">Changes</span><span lang="de">Änderungen</span></a></div>
       <div><h4><span lang="en">Source</span><span lang="de">Quelltext</span></h4><a href="https://github.com/shrippen/kimai-abrechnung-bundle">GitHub</a><a href="https://github.com/shrippen/kimai-abrechnung-bundle/issues">Issues</a></div>
     </nav>
   </div>
-  <div class="foot-meta"><p>GPL-3.0-or-later · shrippen · v1.1.0</p></div>
+  <div class="foot-meta"><p>GPL-3.0-or-later · shrippen · <a href="#changes">v1.1.1</a></p></div>
 </footer>
 
 </body>
