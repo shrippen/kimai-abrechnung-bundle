@@ -51,21 +51,27 @@ yet exported, grouped by customer; marks them as exported (with undo) or reopens
   and `dev/ci.sh`, which installs the release zip into Kimai 2.67 and loads the pages.
 - `demo/` (screenshots) and `dev/` never ship: `.gitattributes` keeps them out of the zip,
   `services.yaml` excludes them.
-- Every release gets its release log before the tag: a section `## [X.Y.Z] — date` in
-  `CHANGELOG.md`, in English and German, each with a lead (what the release is about), then the
-  changes grouped as New, Improved, Fixed and Note (breaking changes, steps the user must take). Each
-  point says what changed for the user and why, not which code moved; then the compare link. Graphics
-  wherever possible: a screenshot from the demo world per visible change
-  (`docs/shots/release-<version>-<name>-<lang>.webp`), a diagram (Kante `.flow`) for changes inside.
-- The same text goes into the Gitea release notes (the release workflow takes it for GitHub and stops
-  without it) and as a new entry at the top of `#changes` in `docs/index.html`; from the fourth entry
-  on, the oldest move into `details.changelog-more`. Bump the footer version. A release is done when
-  the landing page shows it.
-- The notes come from `scripts/release-notes.sh X.Y.Z` (Gitea too: `scripts/release-notes.sh X.Y.Z >
-  notes.md`, then `tea release create --tag vX.Y.Z --title … --note-file notes.md`); CI checks the
-  headings (`scripts/release-notes.sh --check`). The script is a copy of Kante's
-  `tools/release-notes.sh`: change it only there, then sync with
-  `../Kante/tools/sync-release-notes.sh "$PWD"`.
+
+## Release rule
+
+Release steps, in this order (`X.Y.Z` the new version, `A.B.C` the previous one). A release is done only after step 10.
+
+1. On a branch from `main`, bump the version in `composer.json` (`version`; the release workflow checks the tag against it). Nothing else holds it.
+2. Write the release log before the tag in `CHANGELOG.md`, the single source: a section `## [X.Y.Z] — YYYY-MM-DD` at the top (newest first), under `### English` and `### Deutsch` each a lead (what the release is about), the changes grouped as `#### New`, `Improved`, `Fixed` and `Note` (breaking changes, steps the user must take) and the compare link (`https://github.com/shrippen/kimai-abrechnung-bundle/compare/vA.B.C...vX.Y.Z`). Each point says what changed for the user and why, not which code moved. The internal demo is never mentioned. Check the headings with `scripts/release-notes.sh --check` (CI runs it on every push) and read the notes with `scripts/release-notes.sh X.Y.Z`.
+3. Landing page `docs/index.html` (Kante `.changelog`): the same text, in English and German, as a new entry at the top of `#changes`; from the fourth entry on, the oldest move into `details.changelog-more`. Bump the footer version (`vX.Y.Z`, linked to `#changes`). Graphics wherever possible: a screenshot from the demo world per visible change (`docs/shots/release-<version>-<name>-<lang>.webp`; shots in `demo/shots.json`, taken with `../shrippen.github.io/demo/tools/.venv/bin/python ../shrippen.github.io/demo/tools/screenshots.py kimai-abrechnung`), a diagram (Kante `.flow` or inline SVG) for changes inside. Screenshots are taken now, for the tagged release, not with every change.
+4. Open the PR on Gitea, review it as the Repository rule says (a release is published: the owner confirms it in words), merge on Gitea.
+5. Tag the merge commit and push the tag to Gitea only: `git tag vX.Y.Z <merge commit> && git push origin vX.Y.Z` (the mirror carries it to GitHub).
+6. Gitea release, notes only, never files: `scripts/release-notes.sh X.Y.Z > notes.md`, then `tea release create --repo shrippen/kimai-abrechnung-bundle --tag vX.Y.Z --title "Abrechnung X.Y.Z" --note-file notes.md`.
+7. GitHub: the tag starts `.github/workflows/release.yml`. It checks the tag against `composer.json`, builds `AbrechnungBundle-X.Y.Z.zip` (fails if `demo/` is in it), and publishes the release "Abrechnung X.Y.Z" with the same notes (fails without the section) and the zip. Check the run (`gh run list -R shrippen/kimai-abrechnung-bundle --workflow release.yml`) and the release (`gh release view vX.Y.Z -R shrippen/kimai-abrechnung-bundle`: notes and zip).
+8. Update check: `python3 ../shrippen.github.io/overview/tools/build-versions.py`, then commit `docs/versions.json` in `shrippen.github.io` via a PR there.
+9. Deploy to the live instance as `../CLAUDE.md` "Kimai-Plugins deployen" says, from a clean checkout of the tag (no local files):
+   - `rsync -a -i --dry-run --filter=':- .gitignore' --exclude={.git,.gitea,.github,dev,tests,research,docs,reference,scripts,demo} --include=README.md --exclude='*.md' ./ regis.lan:/mnt/ApertureScience/docker/appdata/kimai/plugins/AbrechnungBundle/`; check the list, then run it without `--dry-run`.
+   - In the same SSH step: `chown -R www-data:www-data /mnt/ApertureScience/docker/appdata/kimai/plugins/AbrechnungBundle`, directories `770`, files `664`.
+   - `docker exec -u www-data kimai_app /opt/kimai/bin/console kimai:reload -n` (no install command: the plugin has no own tables). Never without `-u www-data`.
+   - Check: `docker logs --since 2m kimai_app | grep -E 'CRITICAL| 500 '` and `find /mnt/ApertureScience/docker/appdata/kimai/plugins/AbrechnungBundle -not -user www-data` and `docker exec kimai_app find /opt/kimai/var -not -user www-data` are empty, the login page answers 200, the API without token 401 (not 500).
+10. Done when https://shrippen.github.io/kimai-abrechnung-bundle/ shows X.Y.Z at the top of `#changes` and in the footer, and https://shrippen.github.io/versions.json lists `kimai-abrechnung` with X.Y.Z.
+
+`scripts/release-notes.sh` is a copy of Kante's `tools/release-notes.sh`: change it only there, then sync with `../Kante/tools/sync-release-notes.sh "$PWD"`.
 
 ## GUI rule
 
