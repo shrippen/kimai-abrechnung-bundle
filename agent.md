@@ -27,4 +27,5 @@ is published, so the owner confirms it in words.
 
 ## Repository (this project)
 
+- The merge waits for: CI is green on the PR's latest commit: the Gitea checks of `.gitea/workflows/ci.yml`, `CI / Lint (PHP 8.1)` to `CI / Lint (PHP 8.4)` and `CI / Kimai 2.67 end-to-end`, show success there. No status there yet means wait, not merge. PR-Agent's status does not count here.
 - Everything else: `RULES.md` (Repository) and the skill `pr-review`.
