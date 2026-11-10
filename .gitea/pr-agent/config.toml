@@ -7,7 +7,7 @@ max_model_tokens = 128000
 fallback_models = []
 publish_output_progress = false
 # The repository rules go along as context.
-repo_context_files = ["agent.md"]
+repo_context_files = ["agent.md", "RULES.md"]
 
 [pr_reviewer]
 num_max_findings = 5
@@ -34,7 +34,7 @@ Report only findings that matter:
   kit macros); texts missing in one of the translations (de, en).
 - Demo code or data (demo/) reaching the release zip.
 - Missing checks in dev/ci.sh for new pages.
-- Breaches of the repository rules (agent.md).
+- Breaches of the repository rules (agent.md, RULES.md).
 
 Skip style, naming and formatting (php -l, the translation check and the Kimai end-to-end test run
 separately), praise, and
