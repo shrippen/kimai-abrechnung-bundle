@@ -21,7 +21,7 @@ plugin has no tables of its own; it reads and changes Kimai's entries.
 | `Form/AbrechnungToolbarForm.php` | The filter as the toolbar form of the page. |
 | `EventSubscriber/` | Hooks into Kimai: the menu entry, the page's actions (`Actions/`). |
 | `Resources/views/abrechnung/` | The page template. `Resources/views/_kit/` is the vendored Kimai plugin kit, never edited here. |
-| `Resources/translations/` | All texts, German and English, same keys in both. |
+| `Resources/translations/` | All texts, German and English, same keys in both. `kpu.*.xlf` are the kit's texts, vendored and never edited here. |
 | `AbrechnungBundle.php`, `DependencyInjection/`, `Resources/config/` | Registration in Kimai: services and routes. |
 | `dev/` | Checks: translations, and `ci.sh`, which installs the release zip into Kimai and loads the pages. |
 | `demo/`, `docs/`, `scripts/`, `tools/` | Not part of the plugin zip: demo data, landing page, release and check scripts. |
@@ -29,7 +29,7 @@ plugin has no tables of its own; it reads and changes Kimai's entries.
 ## Layers
 
 ```
- entry points   Controller   EventSubscriber   Form
+ entry points   Controller (with its Form)   EventSubscriber
                      │  ask for the work, show the answer
                      ▼
  work           Service ─────────────► Kimai's services (saving an entry, permissions)
@@ -41,11 +41,14 @@ plugin has no tables of its own; it reads and changes Kimai's entries.
  model          AbrechnungQuery   Kimai's entities   (used by every layer above)
 ```
 
+- Entry points use Kimai's building blocks for pages, forms, texts and the menu
+  directly (page setup, data table, formatter, token and permission check).
 - The controller holds no rule: who may change which entry, what undo requires, how
   entries are grouped and summed are services.
 - Only `Repository/` loads entries. Nothing else uses Kimai's repositories.
 - The filter describes itself: which fields it has, how it is read from an address and
-  written into one, its limits and defaults. No other place lists the filter's fields.
+  written into one, its limits and defaults. No other place lists the fields an
+  address carries; the form and the query each use the fields they need.
 - How the page's states (open, billed, all) map to Kimai's export states stands once,
   with the filter, in Kimai's named constants.
 - An action exists once: bill, undo and reopen share one way to change the export state
@@ -64,8 +67,8 @@ plugin has no tables of its own; it reads and changes Kimai's entries.
 | A new column or sum on the page | The grouping service, `Resources/views/abrechnung/index.html.twig`, translations |
 | A new action on entries | A route in the controller, the service that changes the export state, a button in the template, a call in `dev/ci.sh`, translations |
 | A new query | `Repository/OpenItemsRepository.php` |
-| A new page | `Controller/`, a template, `EventSubscriber/MenuSubscriber.php`, `EventSubscriber/Actions/`, `Resources/config/routes.yaml`, translations |
-| A new text | `Resources/translations/*.de.xlf` and `*.en.xlf`, same key |
+| A new page | `Controller/`, a template, `EventSubscriber/MenuSubscriber.php`, `EventSubscriber/Actions/`, translations (routes come from the controller's attributes) |
+| A new text | `Resources/translations/messages.*.xlf` or `flashmessages.*.xlf`, German and English, same key |
 | A design element that is missing | Knust or the kit in Kante, then sync; never `_kit/` here |
 | A release | The steps in `RELEASE.md` |
 
