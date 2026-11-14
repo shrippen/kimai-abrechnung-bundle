@@ -1,5 +1,5 @@
-# Checks on every pull request and on main: PHP syntax, translations (same keys in de and en),
-# and the release zip installed into Kimai 2.67 (dev/ci.sh).
+# Checks on every pull request and on main: structure limits, PHP syntax, translations (same keys
+# in de and en), and the release zip installed into Kimai 2.67 (dev/ci.sh).
 #
 # This same file lives in .gitea/workflows and .github/workflows: Gitea reads only .gitea/workflows
 # as soon as it exists, GitHub only ever reads .github/workflows. Kept as two files, so a change
@@ -31,6 +31,9 @@ jobs:
         php: ['8.1', '8.2', '8.3', '8.4']
     steps:
       - uses: actions/checkout@v4
+
+      - name: Structure limits
+        run: pipx run tools/structure-check.py
 
       - name: CHANGELOG.md headings
         run: scripts/release-notes.sh --check

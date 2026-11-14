@@ -15,7 +15,7 @@ yet exported, grouped by customer; marks them as exported (with undo) or reopens
   `view_invoice`, `edit_export`) → `Repository/OpenItemsRepository.php` (queries) → Kimai entities.
   No own tables.
 - Texts in `Resources/translations/*.{de,en}.xlf`, same keys in both.
-- Checks (CI, `.gitea/workflows/ci.yml`): PHP syntax 8.1–8.4, `php dev/check-translations.php`,
+- Checks (CI, `.gitea/workflows/ci.yml`): structure limits (`tools/structure-check.py`), PHP syntax 8.1–8.4, `php dev/check-translations.php`,
   and `dev/ci.sh`, which installs the release zip into Kimai 2.67 and loads the pages.
 - `demo/` (screenshots) and `dev/` never ship: `.gitattributes` keeps them out of the zip,
   `services.yaml` excludes them.
