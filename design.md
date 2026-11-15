@@ -66,6 +66,8 @@ Keine eigenen Permissions – vermeidet Rollen-Duplikate im Kimai-Admin.
 
 ## Technische Details
 
+Stand des Codes. Der Soll-Aufbau (wohin Gruppierung, Rechteprüfung und Rückgängig gehören) steht in `ARCHITECTURE.md`.
+
 ### Repository
 - `OpenItemsRepository`: nutzt `TimesheetRepository::getTimesheetsForQuery()` mit `TimesheetQuery` (`setCurrentUser()` → Team-Berechtigungen wie in Kimai; Kimai lädt Projekt/Kunde/Tätigkeit/User gebündelt)
 - Filter: billable, nicht exportiert, beendet
