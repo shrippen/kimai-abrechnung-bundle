@@ -18,3 +18,5 @@
 /structure.baseline export-ignore
 /AUDIT.md export-ignore
 /ARCHITECTURE.md export-ignore
+# Rule files and tooling for agents, not part of source archives (git archive).
+/REVIEW.md export-ignore
