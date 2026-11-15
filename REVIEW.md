@@ -15,7 +15,8 @@ entries or hides them from the invoice:
 
 - **Wrong entries billed:** a bill, undo or reopen that touches entries other than the
   ones shown or selected, skips the `edit_export` check per entry, or reopens exported
-  entries without `edit_exported_timesheet`.
+  entries without `edit_exported_timesheet` (undo of one's own bill within its window
+  needs none).
 - **Wrong list:** a filter (customers, users, search, state, period, sorting) that drops
   or adds entries, a month or year boundary off by one, an old link that redirects to
   another period, an export link whose selection differs from the page.
@@ -25,7 +26,8 @@ entries or hides them from the invoice:
   entries changed since.
 - **Breaks Kimai:** a POST without CSRF check, a 500 on the page, a route that fails.
 - **Looks wrong:** own colours, sizes or kit copies instead of Knust and the kit; text
-  missing in German or English; `demo/` or `dev/` in the release zip.
+  missing in German or English.
+- **Ships what it must not:** `demo/` or `dev/` in the release zip.
 - **Lies:** README, CHANGELOG or comments that contradict the code.
 
 ## What to check in particular
